@@ -1,0 +1,123 @@
+<!-- frontend/markentry.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Mark Entry - Smart Attendance System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">
+                <h1>📊 Voice Mark Entry System</h1>
+            </div>
+            <div class="nav-actions">
+                <span class="nav-subject" id="currentSubject">No Subject Selected</span>
+                <button onclick="window.location.href='dashboard.html'" class="btn-secondary">← Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="main-layout">
+            <!-- Left Panel: Voice Controls -->
+            <div class="control-panel">
+                <div class="panel-card">
+                    <h2>🎤 Voice Input</h2>
+                    <div class="subject-input-group">
+                        <label for="subject">Subject Name:</label>
+                        <input type="text" id="subject" placeholder="e.g., Mathematics" onchange="updateSubject()" class="subject-input-field">
+                    </div>
+                    
+                    <div class="voice-controls">
+                        <button id="recordBtn" class="btn-record" onclick="toggleRecording()">
+                            <span id="recordIcon" class="record-icon">🎤</span>
+                            <span id="recordText">Start Recording</span>
+                        </button>
+                        <button id="stopBtn" class="btn-stop" onclick="stopRecording()" disabled>⏹ Stop</button>
+                    </div>
+                    
+                    <div id="status" class="status-message"></div>
+                    <div id="performanceIndicator" class="performance-indicator" style="display:none;">
+                        <span>⚡ Fast Mode Active</span>
+                    </div>
+                    
+                    <div class="instruction-box">
+                        <h4>💡 Instructions</h4>
+                        <p>Speak clearly in these formats:</p>
+                        <ul>
+                            <li>"John got 85 marks"</li>
+                            <li>"Sarah scored 92"</li>
+                            <li>"Mike has 78 marks"</li>
+                        </ul>
+                        <p class="live-update-note">✨ Table updates in real-time as you speak!</p>
+                        <p class="optimization-note">🚀 Optimized for faster processing</p>
+                    </div>
+                </div>
+
+                <div class="panel-card">
+                    <h3>📝 Live Transcription</h3>
+                    <textarea id="transcribedText" rows="6" placeholder="Your voice input will appear here in real-time..." readonly class="transcription-box"></textarea>
+                </div>
+            </div>
+
+            <!-- Right Panel: Excel Table -->
+            <div class="excel-panel">
+                <div class="excel-header">
+                    <h2>📋 Mark Sheet (Live Updates)</h2>
+                    <div class="excel-stats">
+                        <span class="stat-badge" id="entryCount">0 Entries</span>
+                        <span class="stat-badge" id="lastUpdate">Ready</span>
+                    </div>
+                </div>
+                
+                <div class="excel-container" id="excelContainer">
+                    <table class="excel-table" id="excelTable">
+                        <thead>
+                            <tr>
+                                <th class="col-sno">#</th>
+                                <th class="col-name">Student Name</th>
+                                <th class="col-marks">Marks</th>
+                                <th class="col-subject">Subject</th>
+                                <th class="col-date">Date</th>
+                                <th class="col-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="excelTableBody">
+                            <tr class="empty-row">
+                                <td colspan="6" class="empty-message">
+                                    <div class="empty-state">
+                                        <span class="empty-icon">📊</span>
+                                        <p>Start recording to see entries appear here in real-time</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="excel-footer">
+                    <div class="action-buttons">
+                        <button onclick="downloadExcel()" class="btn-success" id="downloadBtn" disabled>
+                            <span>📥</span> Download Excel
+                        </button>
+                        <button onclick="saveEntries()" class="btn-primary" id="saveBtn" disabled>
+                            <span>💾</span> Save to Database
+                        </button>
+                        <button onclick="clearAll()" class="btn-secondary">
+                            <span>🗑️</span> Clear All
+                        </button>
+                        <button onclick="addManualEntry()" class="btn-add">
+                            <span>➕</span> Add Manually
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
