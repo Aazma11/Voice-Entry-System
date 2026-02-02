@@ -654,3 +654,31 @@ body {
         order: 1;
     }
 }
+/* Add to frontend/style.css */
+.needs-correction {
+    background-color: #fff3cd !important;
+    border: 2px solid #ffc107 !important;
+}
+
+.cell-name.needs-correction:focus {
+    background-color: #fff !important;
+    border-color: #007bff !important;
+}
+
+.correction-hint {
+    display: inline-block;
+    margin-left: 5px;
+    color: #856404;
+    font-size: 0.85em;
+    font-weight: bold;
+}
+
+.cell-input {
+    transition: all 0.2s ease;
+}
+
+.cell-input:focus {
+    outline: 2px solid #007bff;
+    outline-offset: 2px;
+    background-color: #f8f9fa;
+}
