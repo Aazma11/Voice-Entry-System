@@ -1,7 +1,8 @@
 // frontend/app.js
 // Auto-detect API URL (works on computer and phone)
 // Auto-detect port (works on 5000 and 5001)
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/teacher`;
+const _port = window.location.port ? `:${window.location.port}` : '';
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}${_port}/api/teacher`;
 let recognition;
 let isRecording = false;
 let transcribedText = '';
@@ -68,7 +69,7 @@ async function teacherAuth() {
     // Verify token is actually a teacher token by calling the teacher profile API
     try {
         const res = await fetch(
-            `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/teacher/profile`,
+            `${window.location.protocol}//${window.location.hostname}${_port}/api/teacher/profile`,
             { headers: { Authorization: `Bearer ${token}` } }
         );
         if (!res.ok) {

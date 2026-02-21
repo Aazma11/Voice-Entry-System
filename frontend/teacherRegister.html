@@ -167,7 +167,8 @@
     </div>
 
     <script>
-        const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/teacher`;
+        const _port = window.location.port ? `:${window.location.port}` : '';
+        const API = `${window.location.protocol}//${window.location.hostname}${_port}/api/teacher`;
 
         document.getElementById('registerForm').addEventListener('submit', async (e) => {
             e.preventDefault();

@@ -481,7 +481,8 @@ function handleCameraStream(cameraStream) {
 
             try {
                 const token = localStorage.getItem('token');
-                const response = await fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student/mark-attendance`, {
+                const _port = window.location.port ? `:${window.location.port}` : '';
+                const response = await fetch(`${window.location.protocol}//${window.location.hostname}${_port}/api/student/mark-attendance`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

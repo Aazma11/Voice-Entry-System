@@ -1,6 +1,6 @@
-// Auto-detect API URL (works on computer and phone)
-// Auto-detect port (works on 5000 and 5001)
-const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student`;
+// Auto-detect API URL (works locally on :5000 and on Render with no port)
+const _port = window.location.port ? `:${window.location.port}` : '';
+const API_BASE_URL = `${window.location.protocol}//${window.location.hostname}${_port}/api/student`;
 
 // Student Login
 async function login(email, password) {

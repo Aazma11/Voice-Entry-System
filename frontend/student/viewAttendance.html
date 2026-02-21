@@ -75,7 +75,8 @@
       tbody.innerHTML = '';
 
       try {
-        const res = await fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student/attendance`, {
+        const _port = window.location.port ? `:${window.location.port}` : '';
+        const res = await fetch(`${window.location.protocol}//${window.location.hostname}${_port}/api/student/attendance`, {
           headers: { 'Authorization': 'Bearer ' + token }
         });
 
