@@ -1,0 +1,290 @@
+<!-- frontend/studentRegister.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Register - Smart Attendance System</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .register-box {
+            max-width: 460px;
+        }
+
+        .register-box h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .register-box .subtitle {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-align: center;
+            margin-bottom: 1.75rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-wrapper input {
+            padding-right: 2.75rem;
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            padding: 0;
+            line-height: 1;
+        }
+
+        .strength-bar {
+            height: 4px;
+            border-radius: 2px;
+            margin-top: 6px;
+            background: #e2e8f0;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s, background 0.3s;
+            width: 0%;
+        }
+
+        .strength-label {
+            font-size: 0.75rem;
+            margin-top: 3px;
+            color: var(--text-secondary);
+        }
+
+        .links-row {
+            margin-top: 1.25rem;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .links-row a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .links-row a:hover { text-decoration: underline; }
+
+        .success-box {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+            border-radius: 0.5rem;
+            padding: 0.875rem 1rem;
+            margin-top: 1rem;
+            display: none;
+            font-weight: 500;
+        }
+
+        @media (max-width: 480px) {
+            .form-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box register-box">
+            <h2>Student Register</h2>
+            <p class="subtitle">Create your account to mark attendance</p>
+
+            <form id="registerForm" novalidate>
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" placeholder="e.g. Priya Sharma" required autocomplete="name">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" placeholder="yourname@college.edu" required autocomplete="email">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="rollNumber">Roll Number</label>
+                        <input type="text" id="rollNumber" placeholder="e.g. 22CS101" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="year">Year</label>
+                        <select id="year" required style="width:100%;padding:0.75rem;border:2px solid var(--border-color);border-radius:0.5rem;font-size:1rem;background:#fff;">
+                            <option value="">Select year</option>
+                            <option value="1st Year">1st Year</option>
+                            <option value="2nd Year">2nd Year</option>
+                            <option value="3rd Year">3rd Year</option>
+                            <option value="4th Year">4th Year</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="password" placeholder="Min. 6 characters"
+                               required autocomplete="new-password" oninput="checkStrength(this.value)">
+                        <button type="button" class="toggle-pw" onclick="togglePw('password', this)">👁</button>
+                    </div>
+                    <div class="strength-bar"><div class="strength-fill" id="strengthFill"></div></div>
+                    <div class="strength-label" id="strengthLabel"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password</label>
+                    <div class="password-wrapper">
+                        <input type="password" id="confirmPassword" placeholder="Re-enter password"
+                               required autocomplete="new-password">
+                        <button type="button" class="toggle-pw" onclick="togglePw('confirmPassword', this)">👁</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary" id="submitBtn" style="width:100%;margin-top:0.5rem;">
+                    Create Account
+                </button>
+            </form>
+
+            <div id="errorMessage" class="error-message"></div>
+            <div id="successMessage" class="success-box"></div>
+
+            <div class="links-row">
+                <a href="studentLogin.html">Already have an account? Login →</a>
+                <a href="login.html">← Teacher Login</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student`;
+
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            clearMessages();
+
+            const name          = document.getElementById('name').value.trim();
+            const email         = document.getElementById('email').value.trim();
+            const rollNumber    = document.getElementById('rollNumber').value.trim();
+            const year          = document.getElementById('year').value;
+            const password      = document.getElementById('password').value;
+            const confirmPw     = document.getElementById('confirmPassword').value;
+
+            // Client-side validation
+            if (!name || !email || !rollNumber || !year || !password || !confirmPw) {
+                showError('Please fill in all fields.');
+                return;
+            }
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters.');
+                return;
+            }
+            if (password !== confirmPw) {
+                showError('Passwords do not match.');
+                return;
+            }
+
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating account…';
+
+            try {
+                const res  = await fetch(`${API}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, rollNumber, year })
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    // Auto-login: save token and redirect
+                    localStorage.setItem('token', data.token);
+                    localStorage.setItem('role', 'student');
+                    localStorage.setItem('student', JSON.stringify(data.student));
+
+                    showSuccess('Account created! Redirecting to your dashboard…');
+                    setTimeout(() => { window.location.href = 'studentDashboard.html'; }, 1500);
+                } else {
+                    showError(data.error || 'Registration failed. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = 'Create Account';
+                }
+            } catch (err) {
+                showError('Network error. Make sure the server is running.');
+                btn.disabled = false;
+                btn.textContent = 'Create Account';
+            }
+        });
+
+        function togglePw(id, btn) {
+            const input = document.getElementById(id);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                btn.textContent = '👁';
+            }
+        }
+
+        function checkStrength(pw) {
+            const fill  = document.getElementById('strengthFill');
+            const label = document.getElementById('strengthLabel');
+            if (!pw) { fill.style.width = '0%'; label.textContent = ''; return; }
+
+            let score = 0;
+            if (pw.length >= 6)  score++;
+            if (pw.length >= 10) score++;
+            if (/[A-Z]/.test(pw)) score++;
+            if (/[0-9]/.test(pw)) score++;
+            if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+            const levels = [
+                { w: '20%', bg: '#ef4444', text: 'Very weak' },
+                { w: '40%', bg: '#f97316', text: 'Weak' },
+                { w: '60%', bg: '#eab308', text: 'Fair' },
+                { w: '80%', bg: '#22c55e', text: 'Strong' },
+                { w: '100%', bg: '#16a34a', text: 'Very strong' }
+            ];
+            const lvl = levels[Math.min(score - 1, 4)] || levels[0];
+            fill.style.width      = lvl.w;
+            fill.style.background = lvl.bg;
+            label.textContent     = lvl.text;
+            label.style.color     = lvl.bg;
+        }
+
+        function showError(msg) {
+            const el = document.getElementById('errorMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function showSuccess(msg) {
+            const el = document.getElementById('successMessage');
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+
+        function clearMessages() {
+            document.getElementById('errorMessage').style.display  = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

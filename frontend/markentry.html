@@ -43,18 +43,6 @@
                     <div id="performanceIndicator" class="performance-indicator" style="display:none;">
                         <span>⚡ Fast Mode Active</span>
                     </div>
-                    
-                    <div class="instruction-box">
-                        <h4>💡 Instructions</h4>
-                        <p>Speak clearly in these formats:</p>
-                        <ul>
-                            <li>"John got 85 marks"</li>
-                            <li>"Sarah scored 92"</li>
-                            <li>"Mike has 78 marks"</li>
-                        </ul>
-                        <p class="live-update-note">✨ Table updates in real-time as you speak!</p>
-                        <p class="optimization-note">🚀 Optimized for faster processing</p>
-                    </div>
                 </div>
 
                 <div class="panel-card">
@@ -119,5 +107,11 @@
     </div>
 
     <script src="app.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            const teacher = await teacherAuth();
+            if (!teacher) return;
+        });
+    </script>
 </body>
 </html>

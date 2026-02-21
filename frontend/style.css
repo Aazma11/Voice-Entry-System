@@ -641,6 +641,9 @@ body {
 }
 
 /* Responsive */
+/* ========== MOBILE RESPONSIVE STYLES ========== */
+
+/* Tablet and below (1024px) */
 @media (max-width: 1024px) {
     .main-layout {
         grid-template-columns: 1fr;
@@ -654,31 +657,346 @@ body {
         order: 1;
     }
 }
-/* Add to frontend/style.css */
-.needs-correction {
-    background-color: #fff3cd !important;
-    border: 2px solid #ffc107 !important;
+
+/* Mobile devices (768px and below) */
+@media (max-width: 768px) {
+    /* Body and container */
+    body {
+        font-size: 14px;
+    }
+
+    .container {
+        padding: 0 1rem;
+        margin: 1rem auto;
+    }
+
+    /* Navbar */
+    .navbar {
+        padding: 0.75rem 0;
+    }
+
+    .nav-container {
+        padding: 0 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .nav-brand h1 {
+        font-size: 1.25rem;
+    }
+
+    .nav-actions {
+        gap: 0.5rem;
+        flex-wrap: wrap;
+    }
+
+    .nav-subject {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+    }
+
+    /* Main layout */
+    .main-layout {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    /* Control panel */
+    .control-panel {
+        order: 2;
+        gap: 1rem;
+    }
+
+    .panel-card {
+        padding: 1rem;
+    }
+
+    .panel-card h2, .panel-card h3 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .subject-input-group {
+        margin-bottom: 1rem;
+    }
+
+    .subject-input-field {
+        padding: 0.625rem;
+        font-size: 0.9375rem;
+    }
+
+    /* Voice controls - larger buttons for touch */
+    .voice-controls {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin: 1rem 0;
+    }
+
+    .btn-record, .btn-stop {
+        padding: 1rem 1.5rem;
+        font-size: 1rem;
+        min-height: 48px; /* Touch-friendly size */
+    }
+
+    .transcription-box {
+        padding: 0.75rem;
+        font-size: 0.8125rem;
+        min-height: 120px;
+    }
+
+    /* Excel panel */
+    .excel-panel {
+        order: 1;
+    }
+
+    .excel-header {
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .excel-header h2 {
+        font-size: 1.25rem;
+        width: 100%;
+    }
+
+    .excel-stats {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .stat-badge {
+        padding: 0.4rem 0.75rem;
+        font-size: 0.8125rem;
+    }
+
+    .excel-container {
+        max-height: calc(100vh - 400px);
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+    }
+
+    /* Excel table */
+    .excel-table {
+        font-size: 0.8125rem;
+        min-width: 600px; /* Allow horizontal scroll */
+    }
+
+    .excel-table th {
+        padding: 0.625rem 0.5rem;
+        font-size: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .excel-table td {
+        padding: 0.5rem;
+    }
+
+    .cell-input {
+        padding: 0.5rem;
+        font-size: 0.8125rem;
+        min-height: 36px; /* Touch-friendly */
+    }
+
+    .col-sno {
+        width: 40px;
+        min-width: 40px;
+    }
+
+    .col-name {
+        width: 150px;
+        min-width: 150px;
+    }
+
+    .col-marks {
+        width: 80px;
+        min-width: 80px;
+    }
+
+    .col-subject {
+        width: 100px;
+        min-width: 100px;
+    }
+
+    .col-date {
+        width: 90px;
+        min-width: 90px;
+        font-size: 0.75rem;
+    }
+
+    .col-actions {
+        width: 50px;
+        min-width: 50px;
+    }
+
+    .btn-delete {
+        font-size: 1.1rem;
+        padding: 0.5rem;
+        min-width: 44px; /* Touch-friendly */
+        min-height: 44px;
+    }
+
+    /* Action buttons */
+    .excel-footer {
+        padding: 1rem;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .btn-primary, .btn-secondary, .btn-success, .btn-add {
+        width: 100%;
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9375rem;
+        min-height: 48px; /* Touch-friendly */
+        justify-content: center;
+    }
+
+    /* Login page */
+    .login-container {
+        padding: 1rem;
+    }
+
+    .login-box {
+        padding: 1.5rem;
+        max-width: 100%;
+    }
+
+    .login-box h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group input {
+        padding: 0.875rem;
+        font-size: 1rem;
+        min-height: 48px; /* Touch-friendly */
+    }
+
+    /* Dashboard cards */
+    .dashboard-cards {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+
+    .card {
+        padding: 1.5rem;
+    }
+
+    .card h3 {
+        font-size: 1.1rem;
+    }
+
+    /* Status messages */
+    .status-message {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.875rem;
+    }
+
+    .performance-indicator {
+        padding: 0.625rem 0.875rem;
+        font-size: 0.8125rem;
+    }
 }
 
-.cell-name.needs-correction:focus {
-    background-color: #fff !important;
-    border-color: #007bff !important;
+/* Small mobile devices (480px and below) */
+@media (max-width: 480px) {
+    .nav-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .excel-header h2 {
+        font-size: 1.1rem;
+    }
+
+    .excel-table {
+        font-size: 0.75rem;
+    }
+
+    .excel-table th {
+        padding: 0.5rem 0.375rem;
+        font-size: 0.6875rem;
+    }
+
+    .excel-table td {
+        padding: 0.375rem;
+    }
+
+    .cell-input {
+        padding: 0.375rem;
+        font-size: 0.75rem;
+    }
+
+    .login-box {
+        padding: 1.25rem;
+    }
+
+    .login-box h2 {
+        font-size: 1.25rem;
+    }
+
+    .panel-card {
+        padding: 0.875rem;
+    }
+
+    .btn-record, .btn-stop {
+        padding: 0.875rem 1.25rem;
+        font-size: 0.9375rem;
+    }
 }
 
-.correction-hint {
-    display: inline-block;
-    margin-left: 5px;
-    color: #856404;
-    font-size: 0.85em;
-    font-weight: bold;
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+    .excel-container {
+        max-height: calc(100vh - 250px);
+    }
+
+    .login-container {
+        padding: 0.5rem;
+    }
+
+    .login-box {
+        padding: 1.25rem;
+    }
 }
 
-.cell-input {
-    transition: all 0.2s ease;
-}
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    /* Remove hover effects on touch devices */
+    .btn-primary:hover:not(:disabled),
+    .btn-success:hover:not(:disabled),
+    .btn-record:hover,
+    .btn-stop:hover {
+        transform: none;
+    }
 
-.cell-input:focus {
-    outline: 2px solid #007bff;
-    outline-offset: 2px;
-    background-color: #f8f9fa;
+    .card:hover {
+        transform: none;
+    }
+
+    /* Increase touch target sizes */
+    .btn-delete {
+        min-width: 48px;
+        min-height: 48px;
+    }
+
+    /* Better focus states for touch */
+    .cell-input:focus,
+    .subject-input-field:focus,
+    .form-group input:focus {
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+    }
 }

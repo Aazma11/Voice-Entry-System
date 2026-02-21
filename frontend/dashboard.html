@@ -20,9 +20,21 @@
 
     <div class="container">
         <div class="dashboard-cards">
+            <div class="card" onclick="window.location.href='teacherProfile.html'">
+                <h3>👤 My Profile</h3>
+                <p>View details, stats &amp; change password</p>
+            </div>
             <div class="card" onclick="window.location.href='markentry.html'">
-                <h3>Voice Mark Entry</h3>
+                <h3>🎤 Voice Mark Entry</h3>
                 <p>Enter marks using voice commands</p>
+            </div>
+            <div class="card" onclick="window.location.href='teacherAttendance.html'">
+                <h3>📋 Student Attendance</h3>
+                <p>View &amp; export student attendance records</p>
+            </div>
+            <div class="card" onclick="window.location.href='markHistory.html'">
+                <h3>📚 Saved Mark Sheets</h3>
+                <p>View, export &amp; manage saved mark entries</p>
             </div>
         </div>
     </div>
@@ -30,26 +42,9 @@
     <script src="app.js"></script>
     <script>
         window.addEventListener('DOMContentLoaded', async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            try {
-                const response = await fetch('http://localhost:5000/api/teacher/profile', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    document.getElementById('teacherName').textContent = `Welcome, ${data.teacher.name}`;
-                } else {
-                    window.location.href = 'login.html';
-                }
-            } catch (error) {
-                window.location.href = 'login.html';
-            }
+            const teacher = await teacherAuth();
+            if (!teacher) return;
+            document.getElementById('teacherName').textContent = `Welcome, ${teacher.name}`;
         });
     </script>
 </body>

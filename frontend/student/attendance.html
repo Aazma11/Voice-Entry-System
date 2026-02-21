@@ -1,0 +1,605 @@
+<!-- frontend/student/attendance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance - Student</title>
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>Mark Attendance</h1>
+            <div class="nav-user">
+                <button onclick="window.location.href='../studentDashboard.html'" class="btn-secondary">Back to Dashboard</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="attendance-box">
+            <h2>Mark Your Attendance</h2>
+            
+            <div id="statusMessage" class="status-message"></div>
+
+            <div class="camera-section">
+                <video id="video" autoplay playsinline style="display: none;"></video>
+                <canvas id="canvas" style="display: none;"></canvas>
+                <div id="cameraPreview" class="camera-preview">
+                    <p>Camera preview will appear here</p>
+                </div>
+            </div>
+
+            <div class="location-info" id="locationInfo">
+                <p><strong>Location:</strong> <span id="locationText">Getting location...</span></p>
+            </div>
+
+            <div class="button-group">
+                <button id="startCameraBtn" class="btn-primary" onclick="startCamera()">Start Camera</button>
+                <button id="captureBtn" class="btn-primary" onclick="captureFace()" disabled>Capture Face</button>
+                <button id="markAttendanceBtn" class="btn-record" onclick="markAttendance()" disabled>Mark Attendance</button>
+            </div>
+
+            <div id="resultMessage" class="result-message"></div>
+        </div>
+    </div>
+
+    <!-- face-api.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="../studentApp.js"></script>
+    <script>
+        const CAMPUS_LAT =17.409818080377836;
+        const CAMPUS_LON =78.60321060547018;
+        const RADIUS_KM = 2; // 2 km radius
+        const MODELS_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+
+        let stream = null;
+        let capturedFaceData = null;
+        let capturedDescriptor = null; // 128-number face descriptor
+        let currentLocation = null;
+        let isLocationValid = false;
+        let faceModelsLoaded = false;
+
+        // Load face-api models in background
+        async function loadFaceModels() {
+            try {
+                await Promise.all([
+                    faceapi.nets.ssdMobilenetv1.loadFromUri(MODELS_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODELS_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODELS_URL)
+                ]);
+                faceModelsLoaded = true;
+                console.log('Face recognition models loaded');
+            } catch (e) {
+                console.error('Face model load error:', e);
+            }
+        }
+
+        // Calculate distance between two coordinates (Haversine formula)
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = 
+                Math.sin(dLat/2) * Math.sin(dLat/2) +
+                Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        // Validate location against campus coordinates
+        function validateLocation(location) {
+            if (!location || !location.latitude || !location.longitude) {
+                return false;
+            }
+
+            const distance = calculateDistance(
+                location.latitude,
+                location.longitude,
+                CAMPUS_LAT,
+                CAMPUS_LON
+            );
+
+            console.log(`Location check: Distance from campus: ${distance.toFixed(3)} km (Max allowed: ${RADIUS_KM} km)`);
+            console.log(`Campus: ${CAMPUS_LAT}, ${CAMPUS_LON}`);
+            console.log(`User: ${location.latitude}, ${location.longitude}`);
+            
+            const isValid = distance <= RADIUS_KM;
+            console.log(`Location validation result: ${isValid}`);
+            
+            return isValid;
+        }
+
+        // Update camera button state based on location validity
+        function updateCameraButtonState() {
+            const startCameraBtn = document.getElementById('startCameraBtn');
+            if (startCameraBtn) {
+                if (isLocationValid) {
+                    startCameraBtn.disabled = false;
+                    startCameraBtn.style.opacity = '1';
+                    startCameraBtn.style.cursor = 'pointer';
+                } else {
+                    startCameraBtn.disabled = true;
+                    startCameraBtn.style.opacity = '0.6';
+                    startCameraBtn.style.cursor = 'not-allowed';
+                }
+            }
+        }
+
+        // Check authentication
+        window.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            
+            if (!token || role !== 'student') {
+                window.location.href = '../studentLogin.html';
+                return;
+            }
+
+            // Load face models in background (non-blocking)
+            loadFaceModels();
+
+            // Get location on page load
+            getLocation();
+            
+            // Initially disable camera button until location is validated
+            updateCameraButtonState();
+        });
+
+        // Get GPS Location
+function getLocation() {
+    if (!navigator.geolocation) {
+        showStatus('Geolocation is not supported. Please enter location manually.', 'error');
+        showManualLocationInput();
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            currentLocation = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude,
+                accuracy: position.coords.accuracy
+            };
+            
+            // Validate location FIRST
+            isLocationValid = validateLocation(currentLocation);
+            
+            if (isLocationValid) {
+                // Get address from coordinates (optional)
+                getAddressFromCoordinates(currentLocation.latitude, currentLocation.longitude);
+                showStatus('✅ Location valid! You can now start the camera.', 'success');
+                hideManualLocationInput();
+            } else {
+                showStatus('❌ Invalid location. You must be inside college campus to mark attendance.', 'error');
+                // Still set address so it's stored if somehow submitted
+                getAddressFromCoordinates(currentLocation.latitude, currentLocation.longitude);
+                hideManualLocationInput();
+            }
+            
+            // Update camera button state
+            updateCameraButtonState();
+        },
+        (error) => {
+            // Check if it's a secure origin error
+            if (error.message.includes('secure') || error.message.includes('Only secure origins')) {
+                showStatus('GPS requires HTTPS. Please enter location manually below.', 'error');
+                showManualLocationInput();
+            } else {
+                showStatus('Error getting location: ' + error.message + '. Please enter manually.', 'error');
+                showManualLocationInput();
+            }
+        }
+    );
+}
+
+// Show manual location input
+function showManualLocationInput() {
+    let manualInput = document.getElementById('manualLocationInput');
+    if (!manualInput) {
+        const locationInfo = document.getElementById('locationInfo');
+        manualInput = document.createElement('div');
+        manualInput.id = 'manualLocationInput';
+        manualInput.style.marginTop = '10px';
+        manualInput.innerHTML = `
+            <div style="background: #fef3c7; padding: 15px; border-radius: 8px; border: 1px solid #f59e0b;">
+                <p style="margin-bottom: 10px; font-weight: 600; color: #92400e;">Enter Location Manually:</p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <input type="number" id="manualLat" placeholder="Latitude (e.g., 17.4097)" step="any" 
+                           style="flex: 1; min-width: 150px; padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
+                    <input type="number" id="manualLon" placeholder="Longitude (e.g., 78.6032)" step="any"
+                           style="flex: 1; min-width: 150px; padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
+                    <button onclick="useManualLocation()" 
+                            style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                        Use This Location
+                    </button>
+                </div>
+                <p style="margin-top: 10px; font-size: 0.875rem; color: #92400e;">
+                    💡 Tip: For testing, use campus coordinates: Lat: 17.4097, Lon: 78.6032
+                </p>
+            </div>
+        `;
+        locationInfo.appendChild(manualInput);
+    }
+    manualInput.style.display = 'block';
+}
+
+// Hide manual location input
+function hideManualLocationInput() {
+    const manualInput = document.getElementById('manualLocationInput');
+    if (manualInput) {
+        manualInput.style.display = 'none';
+    }
+}
+
+// Use manually entered location
+function useManualLocation() {
+    const lat = parseFloat(document.getElementById('manualLat').value);
+    const lon = parseFloat(document.getElementById('manualLon').value);
+    
+    if (isNaN(lat) || isNaN(lon)) {
+        showStatus('Please enter valid latitude and longitude', 'error');
+        return;
+    }
+    
+    if (lat < -90 || lat > 90 || lon < -180 || lon > 180) {
+        showStatus('Invalid coordinates. Latitude: -90 to 90, Longitude: -180 to 180', 'error');
+        return;
+    }
+    
+    currentLocation = {
+        latitude: lat,
+        longitude: lon,
+        address: 'Manually entered location'
+    };
+    
+    // Validate location FIRST
+    isLocationValid = validateLocation(currentLocation);
+    
+    if (isLocationValid) {
+        document.getElementById('locationText').textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)} (Manual) - Valid`;
+        showStatus('✅ Location valid! You can now start the camera.', 'success');
+    } else {
+        document.getElementById('locationText').textContent = `${lat.toFixed(6)}, ${lon.toFixed(6)} (Manual) - Invalid`;
+        showStatus('❌ Invalid location. You must be inside college campus to mark attendance.', 'error');
+    }
+    
+    // Update camera button state
+    updateCameraButtonState();
+    hideManualLocationInput();
+}
+
+        // Get address from coordinates (using reverse geocoding)
+        async function getAddressFromCoordinates(lat, lon) {
+            // Always set raw coords as fallback so address is never empty
+            const rawCoords = `${lat.toFixed(6)}, ${lon.toFixed(6)}`;
+            currentLocation.address = rawCoords;
+            document.getElementById('locationText').textContent = rawCoords;
+
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`,
+                    { headers: { 'Accept-Language': 'en' } }
+                );
+                const data = await response.json();
+                if (data.address) {
+                    const parts = [
+                        data.address.road || data.address.suburb || '',
+                        data.address.city || data.address.town || data.address.village || ''
+                    ].filter(Boolean);
+                    const address = parts.join(', ') || rawCoords;
+                    currentLocation.address = address;
+                    document.getElementById('locationText').textContent = address;
+                }
+            } catch (error) {
+                // rawCoords already set above — nothing more to do
+            }
+        }
+
+// Start Camera
+async function startCamera() {
+    // FIRST: Validate location before opening camera
+    if (!currentLocation) {
+        showStatus('Location not available. Please wait for GPS or enter location manually.', 'error');
+        showManualLocationInput();
+        return;
+    }
+
+    // Validate location
+    isLocationValid = validateLocation(currentLocation);
+    if (!isLocationValid) {
+        showStatus('❌ Invalid location. You must be inside college campus to access camera.', 'error');
+        return;
+    }
+
+    try {
+        // Check if mediaDevices exists
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            // Try legacy API for older browsers/phones
+            const getUserMedia = navigator.getUserMedia || 
+                                navigator.webkitGetUserMedia || 
+                                navigator.mozGetUserMedia ||
+                                navigator.msGetUserMedia;
+            
+            if (!getUserMedia) {
+                showStatus('Camera not supported. Please use Chrome browser on your phone.', 'error');
+                return;
+            }
+            
+            // Use legacy API with Promise wrapper
+            getUserMedia.call(navigator, 
+                { video: { facingMode: 'user' } },
+                (stream) => {
+                    handleCameraStream(stream);
+                },
+                (error) => {
+                    let errorMsg = 'Error accessing camera: ' + error.message;
+                    if (error.name === 'NotAllowedError' || error.code === 1) {
+                        errorMsg = 'Camera permission denied. Please allow camera access in browser settings.';
+                    } else if (error.name === 'NotFoundError' || error.code === 0) {
+                        errorMsg = 'No camera found on your device.';
+                    }
+                    showStatus(errorMsg, 'error');
+                }
+            );
+            return;
+        }
+        
+        // Modern API
+        stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+                facingMode: 'user',
+                width: { ideal: 640 },
+                height: { ideal: 480 }
+            } 
+        });
+        
+        handleCameraStream(stream);
+    } catch (error) {
+        console.error('Camera error:', error);
+        let errorMsg = 'Error accessing camera: ' + error.message;
+        if (error.name === 'NotAllowedError') {
+            errorMsg = 'Camera permission denied. Please allow camera access in browser settings and refresh the page.';
+        } else if (error.name === 'NotFoundError') {
+            errorMsg = 'No camera found. Please check your device has a camera.';
+        } else if (error.name === 'NotReadableError') {
+            errorMsg = 'Camera is being used by another app. Please close other apps using the camera.';
+        }
+        showStatus(errorMsg, 'error');
+    }
+}
+
+// Helper function to handle camera stream
+function handleCameraStream(cameraStream) {
+    stream = cameraStream;
+    const video = document.getElementById('video');
+    const cameraPreview = document.getElementById('cameraPreview');
+    
+    if (video) {
+        video.srcObject = stream;
+        video.style.display = 'block';
+    }
+    if (cameraPreview) {
+        cameraPreview.style.display = 'none';
+    }
+    
+    const startBtn = document.getElementById('startCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    if (startBtn) startBtn.disabled = true;
+    if (captureBtn) captureBtn.disabled = false;
+    showStatus('Camera started. Position your face in the frame.', 'success');
+}
+
+// Helper function to handle camera stream
+function handleCameraStream(cameraStream) {
+    stream = cameraStream;
+    const video = document.getElementById('video');
+    if (video) {
+        video.srcObject = stream;
+        video.style.display = 'block';
+        const cameraPreview = document.getElementById('cameraPreview');
+        if (cameraPreview) cameraPreview.style.display = 'none';
+    }
+    
+    const startBtn = document.getElementById('startCameraBtn');
+    const captureBtn = document.getElementById('captureBtn');
+    if (startBtn) startBtn.disabled = true;
+    if (captureBtn) captureBtn.disabled = false;
+    showStatus('Camera started. Position your face in the frame.', 'success');
+}
+
+        // Capture Face
+        async function captureFace() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const context = canvas.getContext('2d');
+
+            canvas.width  = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0);
+
+            capturedFaceData = canvas.toDataURL('image/jpeg', 0.8);
+
+            // Stop camera
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.style.display = 'none';
+            }
+
+            document.getElementById('captureBtn').disabled = true;
+            showStatus('Face captured. Detecting face…', 'success');
+
+            // Extract face descriptor using face-api.js
+            if (faceModelsLoaded) {
+                try {
+                    const detection = await faceapi
+                        .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+                        .withFaceLandmarks()
+                        .withFaceDescriptor();
+
+                    if (detection) {
+                        capturedDescriptor = Array.from(detection.descriptor);
+                        showStatus('Face detected! Click "Mark Attendance" to submit.', 'success');
+                    } else {
+                        showStatus('No face detected in captured photo. Please retake in good lighting.', 'error');
+                        document.getElementById('captureBtn').disabled = false;
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Face detection error:', e);
+                    showStatus('Face detection failed. Please retake the photo.', 'error');
+                    document.getElementById('captureBtn').disabled = false;
+                    return;
+                }
+            } else {
+                showStatus('Face models still loading. Please wait a moment and try again.', 'error');
+                document.getElementById('captureBtn').disabled = false;
+                return;
+            }
+
+            document.getElementById('markAttendanceBtn').disabled = false;
+        }
+
+        // Mark Attendance
+        async function markAttendance() {
+            if (!capturedFaceData) {
+                showStatus('Please capture your face first', 'error');
+                return;
+            }
+
+            if (!currentLocation) {
+                showStatus('Location not available. Please enter location manually or allow GPS access.', 'error');
+                showManualLocationInput();
+                return;
+            }
+
+            const markBtn = document.getElementById('markAttendanceBtn');
+            markBtn.disabled = true;
+            markBtn.textContent = 'Marking...';
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student/mark-attendance`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        faceData: capturedFaceData,
+                        faceDescriptor: capturedDescriptor,
+                        location: currentLocation
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showResult('Attendance marked successfully!', 'success');
+                    markBtn.textContent = 'Attendance Marked ✓';
+                    markBtn.style.backgroundColor = '#10b981';
+                    
+                    // Reset after 3 seconds
+                    setTimeout(() => {
+                        location.reload();
+                    }, 3000);
+                } else {
+                    showResult(data.error || 'Failed to mark attendance', 'error');
+                    markBtn.disabled = false;
+                    markBtn.textContent = 'Mark Attendance';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showResult('Network error. Please try again.', 'error');
+                markBtn.disabled = false;
+                markBtn.textContent = 'Mark Attendance';
+            }
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = `status-message ${type}`;
+            statusDiv.style.display = 'block';
+        }
+
+        // Show result message
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('resultMessage');
+            resultDiv.textContent = message;
+            resultDiv.className = `result-message ${type}`;
+            resultDiv.style.display = 'block';
+        }
+    </script>
+
+    <style>
+        .attendance-box {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .camera-section {
+            margin: 20px 0;
+        }
+
+        .camera-preview {
+            width: 100%;
+            height: 300px;
+            background: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+        }
+
+        #video {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
+            background: #000;
+        }
+
+        .location-info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .status-message, .result-message {
+            padding: 12px;
+            border-radius: 6px;
+            margin: 15px 0;
+            display: none;
+        }
+
+        .status-message.success, .result-message.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .status-message.error, .result-message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+    </style>
+</body>
+</html>

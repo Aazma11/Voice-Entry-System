@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Mark Sheets</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { font-size: 1.2rem; font-weight: 700; }
+        .navbar-right { display: flex; align-items: center; gap: 10px; }
+        .btn-back {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 7px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-back:hover { background: rgba(255,255,255,0.25); }
+
+        .container {
+            max-width: 1100px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        /* ── Search bar ── */
+        .search-card {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .search-card input {
+            flex: 1;
+            min-width: 200px;
+            padding: 9px 14px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-card input:focus { border-color: #2563eb; }
+        .btn-search {
+            padding: 9px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-search:hover { background: #1d4ed8; }
+
+        /* ── Cards grid ── */
+        .records-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 16px;
+        }
+
+        .record-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            overflow: hidden;
+            transition: transform 0.15s, box-shadow 0.15s;
+            cursor: pointer;
+        }
+        .record-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        }
+        .card-top {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            padding: 18px 20px;
+            color: white;
+        }
+        .card-top h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .card-top .saved-date {
+            font-size: 0.78rem;
+            opacity: 0.8;
+        }
+        .card-body {
+            padding: 16px 20px;
+        }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .stat-box {
+            text-align: center;
+            padding: 8px 4px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .stat-box .val {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+        .stat-box .lbl {
+            font-size: 0.68rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .btn-view {
+            flex: 1;
+            padding: 8px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-view:hover { background: #1d4ed8; }
+        .btn-export-card {
+            padding: 8px 12px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-export-card:hover { background: #15803d; }
+        .btn-del {
+            padding: 8px 12px;
+            background: #fee2e2;
+            color: #dc2626;
+            border: none;
+            border-radius: 7px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-del:hover { background: #fecaca; }
+
+        /* ── Empty / Loading ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-state p { font-size: 1rem; }
+        .empty-state a {
+            display: inline-block;
+            margin-top: 14px;
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* ── Detail Modal ── */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+        .modal-overlay.open { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 700px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: modalIn 0.25s ease;
+        }
+        @keyframes modalIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            color: white;
+            padding: 20px 24px;
+            border-radius: 16px 16px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-header h2 { font-size: 1.1rem; font-weight: 700; }
+        .modal-header .meta { font-size: 0.8rem; opacity: 0.8; margin-top: 3px; }
+        .btn-close {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-close:hover { background: rgba(255,255,255,0.35); }
+        .modal-stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .modal-stat {
+            text-align: center;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        .modal-stat .v { font-size: 1.4rem; font-weight: 800; color: #1e3a5f; }
+        .modal-stat .l { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+            padding: 0 24px 16px;
+        }
+        .modal-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+            margin-top: 12px;
+        }
+        .modal-table thead th {
+            background: #f8fafc;
+            padding: 10px 12px;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+        }
+        .modal-table tbody tr { border-bottom: 1px solid #f1f5f9; }
+        .modal-table tbody tr:hover { background: #f8fafc; }
+        .modal-table tbody td { padding: 10px 12px; color: #374151; }
+        .grade-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .grade-O  { background: #dcfce7; color: #16a34a; }
+        .grade-A  { background: #dbeafe; color: #1d4ed8; }
+        .grade-B  { background: #fef3c7; color: #d97706; }
+        .grade-C  { background: #fee2e2; color: #dc2626; }
+        .modal-footer {
+            padding: 14px 24px;
+            border-top: 1px solid #f1f5f9;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn-modal-export {
+            padding: 9px 18px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .btn-modal-export:hover { background: #15803d; }
+        .btn-modal-close {
+            padding: 9px 18px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 20px;
+        }
+        .page-btn {
+            padding: 7px 16px;
+            border: 1.5px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        .page-btn:hover:not(:disabled) { border-color: #2563eb; color: #2563eb; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-info { font-size: 0.85rem; color: #64748b; padding: 7px 8px; }
+
+        @media (max-width: 600px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+            .modal-stats { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <h1>📚 Saved Mark Sheets</h1>
+    <div class="navbar-right">
+        <span id="teacherName" style="font-size:0.85rem;opacity:0.85;"></span>
+        <button class="btn-back" onclick="window.location.href='markentry.html'">+ New Entry</button>
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+    </div>
+</nav>
+
+<div class="container">
+
+    <!-- Search -->
+    <div class="search-card">
+        <input type="text" id="searchSubject" placeholder="Search by subject name…"
+               onkeydown="if(event.key==='Enter') loadRecords(1)">
+        <button class="btn-search" onclick="loadRecords(1)">Search</button>
+        <button class="btn-search" style="background:#6b7280;" onclick="resetSearch()">Reset</button>
+    </div>
+
+    <!-- Cards -->
+    <div id="recordsGrid" class="records-grid">
+        <div class="empty-state"><div class="icon">⏳</div><p>Loading…</p></div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+        <div class="modal-header">
+            <div>
+                <h2 id="modalSubject">Subject</h2>
+                <div class="meta" id="modalMeta"></div>
+            </div>
+            <button class="btn-close" onclick="closeModalDirect()">✕</button>
+        </div>
+        <div class="modal-stats">
+            <div class="modal-stat"><div class="v" id="mTotal">—</div><div class="l">Students</div></div>
+            <div class="modal-stat"><div class="v" id="mAvg">—</div><div class="l">Average</div></div>
+            <div class="modal-stat"><div class="v" id="mHigh" style="color:#16a34a;">—</div><div class="l">Highest</div></div>
+            <div class="modal-stat"><div class="v" id="mLow" style="color:#dc2626;">—</div><div class="l">Lowest</div></div>
+        </div>
+        <div class="modal-body">
+            <table class="modal-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Marks</th>
+                        <th>Grade</th>
+                    </tr>
+                </thead>
+                <tbody id="modalBody"></tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button class="btn-modal-export" id="modalExportBtn" onclick="exportCurrentModal()">⬇ Export Excel</button>
+            <button class="btn-modal-close" onclick="closeModalDirect()">Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="../app.js"></script>
+
+<script>
+    const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/teacher`;
+    const token = localStorage.getItem('token');
+
+    let currentModalRecord = null;
+    let currentPage = 1;
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const teacher = await teacherAuth();
+        if (!teacher) return;
+        document.getElementById('teacherName').textContent = teacher.name;
+        loadRecords(1);
+    });
+
+    async function loadTeacherName() {
+        try {
+            const r = await fetch(`${API}/profile`, { headers: { Authorization: `Bearer ${token}` } });
+            if (r.ok) {
+                const d = await r.json();
+                document.getElementById('teacherName').textContent = d.teacher.name;
+            }
+        } catch (_) {}
+    }
+
+    async function loadRecords(page = 1) {
+        currentPage = page;
+        const subject = document.getElementById('searchSubject').value.trim();
+        const params = new URLSearchParams({ page, limit: 12 });
+        if (subject) params.set('subject', subject);
+
+        const grid = document.getElementById('recordsGrid');
+        grid.innerHTML = '<div class="empty-state"><div class="icon">⏳</div><p>Loading…</p></div>';
+
+        try {
+            const r = await fetch(`${API}/mark-entries?${params}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (r.status === 401) { window.location.href = 'login.html'; return; }
+            const data = await r.json();
+
+            if (!data.records || data.records.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column:1/-1;">
+                        <div class="icon">📭</div>
+                        <p>No saved mark sheets found.</p>
+                        <a href="markentry.html">Go to Voice Mark Entry →</a>
+                    </div>`;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            grid.innerHTML = data.records.map(rec => `
+                <div class="record-card">
+                    <div class="card-top" onclick="viewRecord('${rec.id}')">
+                        <h3>📘 ${escHtml(rec.subject)}</h3>
+                        <div class="saved-date">Saved on ${formatDate(rec.savedAt)}</div>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-row">
+                            <div class="stat-box"><div class="val">${rec.totalStudents}</div><div class="lbl">Students</div></div>
+                            <div class="stat-box"><div class="val">${rec.averageMark}</div><div class="lbl">Avg</div></div>
+                            <div class="stat-box"><div class="val" style="color:#16a34a">${rec.highestMark}</div><div class="lbl">High</div></div>
+                            <div class="stat-box"><div class="val" style="color:#dc2626">${rec.lowestMark}</div><div class="lbl">Low</div></div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn-view" onclick="viewRecord('${rec.id}')">👁 View</button>
+                            <button class="btn-export-card" onclick="exportRecord('${rec.id}', '${escHtml(rec.subject)}')">⬇ Excel</button>
+                            <button class="btn-del" onclick="deleteRecord('${rec.id}', this)">🗑</button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            renderPagination(data.total, page, 12);
+
+        } catch (err) {
+            grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;"><div class="icon">❌</div><p>Error: ${err.message}</p></div>`;
+        }
+    }
+
+    function renderPagination(total, page, limit) {
+        const pages = Math.ceil(total / limit);
+        const el = document.getElementById('pagination');
+        if (pages <= 1) { el.innerHTML = ''; return; }
+        el.innerHTML = `
+            <button class="page-btn" onclick="loadRecords(${page - 1})" ${page <= 1 ? 'disabled' : ''}>‹ Prev</button>
+            <span class="page-info">Page ${page} of ${pages}</span>
+            <button class="page-btn" onclick="loadRecords(${page + 1})" ${page >= pages ? 'disabled' : ''}>Next ›</button>
+        `;
+    }
+
+    async function viewRecord(id) {
+        try {
+            const r = await fetch(`${API}/mark-entries/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await r.json();
+            if (!data.success) throw new Error(data.error);
+
+            const rec = data.record;
+            currentModalRecord = rec;
+
+            document.getElementById('modalSubject').textContent = '📘 ' + rec.subject;
+            document.getElementById('modalMeta').textContent = `Saved on ${formatDate(rec.savedAt)}`;
+            document.getElementById('mTotal').textContent = rec.totalStudents;
+            document.getElementById('mAvg').textContent = rec.averageMark;
+            document.getElementById('mHigh').textContent = rec.highestMark;
+            document.getElementById('mLow').textContent = rec.lowestMark;
+
+            document.getElementById('modalBody').innerHTML = rec.entries.map((e, i) => {
+                const grade = getGrade(e.mark);
+                return `<tr>
+                    <td style="color:#94a3b8;">${i + 1}</td>
+                    <td><strong>${escHtml(e.studentName)}</strong></td>
+                    <td><strong>${e.mark}</strong> / 100</td>
+                    <td><span class="grade-badge grade-${grade}">${grade}</span></td>
+                </tr>`;
+            }).join('');
+
+            document.getElementById('modalOverlay').classList.add('open');
+        } catch (err) {
+            alert('Error loading record: ' + err.message);
+        }
+    }
+
+    function closeModal(e) {
+        if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+    }
+    function closeModalDirect() {
+        document.getElementById('modalOverlay').classList.remove('open');
+        currentModalRecord = null;
+    }
+
+    async function exportRecord(id, subject) {
+        try {
+            const r = await fetch(`${API}/mark-entries/${id}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await r.json();
+            if (!data.success) throw new Error(data.error);
+            generateExcel(data.record);
+        } catch (err) {
+            alert('Error: ' + err.message);
+        }
+    }
+
+    function exportCurrentModal() {
+        if (currentModalRecord) generateExcel(currentModalRecord);
+    }
+
+    function generateExcel(rec) {
+        const rows = rec.entries.map((e, i) => ({
+            '#': i + 1,
+            'Student Name': e.studentName,
+            'Marks': e.mark,
+            'Grade': getGrade(e.mark),
+            'Subject': rec.subject,
+            'Date': formatDate(rec.savedAt)
+        }));
+
+        const ws = XLSX.utils.json_to_sheet(rows);
+        ws['!cols'] = [
+            { wch: 4 }, { wch: 24 }, { wch: 8 }, { wch: 8 }, { wch: 18 }, { wch: 14 }
+        ];
+
+        // Force text type on Grade and Date columns
+        const rowCount = rows.length + 1;
+        for (let row = 2; row <= rowCount; row++) {
+            ['D', 'F'].forEach(col => {
+                const cell = ws[`${col}${row}`];
+                if (cell) { cell.t = 's'; cell.z = '@'; }
+            });
+        }
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Marks');
+        XLSX.writeFile(wb, `marks_${rec.subject.replace(/\s+/g,'_')}_${formatDate(rec.savedAt)}.xlsx`);
+    }
+
+    async function deleteRecord(id, btn) {
+        if (!confirm('Delete this mark sheet permanently?')) return;
+        btn.disabled = true;
+        btn.textContent = '…';
+        try {
+            const r = await fetch(`${API}/mark-entries/${id}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const data = await r.json();
+            if (data.success) {
+                loadRecords(currentPage);
+            } else {
+                alert(data.error || 'Delete failed');
+                btn.disabled = false;
+                btn.textContent = '🗑';
+            }
+        } catch (err) {
+            alert('Error: ' + err.message);
+            btn.disabled = false;
+            btn.textContent = '🗑';
+        }
+    }
+
+    function resetSearch() {
+        document.getElementById('searchSubject').value = '';
+        loadRecords(1);
+    }
+
+    function getGrade(mark) {
+        if (mark >= 90) return 'O';
+        if (mark >= 75) return 'A';
+        if (mark >= 50) return 'B';
+        return 'C';
+    }
+
+    function formatDate(isoStr) {
+        if (!isoStr) return '-';
+        const d = new Date(isoStr);
+        const day   = String(d.getDate()).padStart(2, '0');
+        const month = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+        const year  = d.getFullYear();
+        return `${day}-${month}-${year}`;
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
+
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!-- frontend/studentDashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>Student Dashboard</h1>
+            <div class="nav-user">
+                <span id="studentName"></span>
+                <button onclick="logout()" class="btn-secondary">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="dashboard-cards">
+            <div class="card" onclick="window.location.href='student/profile.html'">
+                <h3>👤 My Profile</h3>
+                <p>View your details and set your face verification image</p>
+            </div>
+            <div class="card" onclick="window.location.href='student/attendance.html'">
+                <h3>📍 Mark Attendance</h3>
+                <p>Mark your attendance using face recognition</p>
+            </div>
+            <div class="card" onclick="window.location.href='student/viewAttendance.html'">
+                <h3>📋 View Attendance</h3>
+                <p>Check your attendance records</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="studentApp.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const role = localStorage.getItem('role');
+            
+            if (!token || role !== 'student') {
+                window.location.href = 'studentLogin.html';
+                return;
+            }
+
+            try {
+                const response = await fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('studentName').textContent = `Welcome, ${data.student.name}`;
+                } else {
+                    window.location.href = 'studentLogin.html';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                window.location.href = 'studentLogin.html';
+            }
+        });
+    </script>
+</body>
+</html>

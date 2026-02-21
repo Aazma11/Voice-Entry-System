@@ -1,0 +1,181 @@
+<!-- frontend/student/viewAttendance.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Attendance - Student</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-container">
+      <h1>My Attendance</h1>
+      <div class="nav-user">
+        <button onclick="window.location.href='../studentDashboard.html'" class="btn-secondary">
+          Back to Dashboard
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="attendance-box">
+      <h2>Attendance Records</h2>
+
+      <div id="stats" class="location-info" style="margin-bottom: 16px; display: none;">
+        <p><strong>Total Days:</strong> <span id="statTotal"></span></p>
+        <p><strong>Present Days:</strong> <span id="statPresent"></span></p>
+        <p><strong>Absent Days:</strong> <span id="statAbsent"></span></p>
+        <p><strong>Attendance %:</strong> <span id="statPercent"></span></p>
+      </div>
+
+      <div id="loading" class="status-message success" style="display: block;">
+        Loading attendance...
+      </div>
+      <div id="error" class="status-message error" style="display: none;"></div>
+
+      <div style="overflow-x: auto; margin-top: 12px;">
+        <table class="table" id="attendanceTable" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align:left; padding: 8px;">Date</th>
+              <th style="text-align:left; padding: 8px;">Slot</th>
+              <th style="text-align:left; padding: 8px;">Status</th>
+              <th style="text-align:left; padding: 8px;">Location</th>
+            </tr>
+          </thead>
+          <tbody id="attendanceBody">
+            <!-- rows inserted by JS -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="../studentApp.js"></script>
+  <script>
+    async function fetchAttendance() {
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('role');
+
+      if (!token || role !== 'student') {
+        window.location.href = '../studentLogin.html';
+        return;
+      }
+
+      const loadingEl = document.getElementById('loading');
+      const errorEl = document.getElementById('error');
+      const statsEl = document.getElementById('stats');
+      const tbody = document.getElementById('attendanceBody');
+
+      loadingEl.style.display = 'block';
+      errorEl.style.display = 'none';
+      statsEl.style.display = 'none';
+      tbody.innerHTML = '';
+
+      try {
+        const res = await fetch(`${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student/attendance`, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+
+        const data = await res.json();
+
+        loadingEl.style.display = 'none';
+
+        if (!res.ok) {
+          errorEl.textContent = data.error || 'Failed to load attendance.';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        const records = data.records || [];
+
+        if (records.length === 0) {
+          errorEl.textContent = 'No attendance records found.';
+          errorEl.style.display = 'block';
+          return;
+        }
+
+        // Show statistics
+        if (data.statistics) {
+          statsEl.style.display = 'block';
+          document.getElementById('statTotal').textContent = data.statistics.totalDays;
+          document.getElementById('statPresent').textContent = data.statistics.presentDays;
+          document.getElementById('statAbsent').textContent = data.statistics.absentDays;
+          document.getElementById('statPercent').textContent = data.statistics.attendancePercentage + '%';
+        }
+
+        // Render table rows
+        records.forEach((rec) => {
+          const tr = document.createElement('tr');
+
+          const date = new Date(rec.date);
+          const dateStr = date.toLocaleString('en-IN', {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit'
+          });
+
+          const slot = rec.slot ? rec.slot.charAt(0).toUpperCase() + rec.slot.slice(1) : '—';
+
+          const statusTd = document.createElement('td');
+          statusTd.textContent = rec.status || 'Present';
+          statusTd.style.padding = '8px';
+          statusTd.style.color = rec.status === 'Present' ? '#065f46' : '#991b1b';
+
+          tr.innerHTML = `
+            <td style="padding:8px;">${dateStr}</td>
+            <td style="padding:8px;">${slot}</td>
+          `;
+          tr.appendChild(statusTd);
+          tr.innerHTML += `
+            <td style="padding:8px;">${(rec.location && rec.location.address) || '—'}</td>
+          `;
+
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error(err);
+        loadingEl.style.display = 'none';
+        errorEl.textContent = 'Network error. Please try again.';
+        errorEl.style.display = 'block';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', fetchAttendance);
+  </script>
+
+  <style>
+    .attendance-box {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 30px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .table th, .table td {
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 14px;
+    }
+    .status-message {
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 10px;
+    }
+    .status-message.success {
+      background: #d1fae5;
+      color: #065f46;
+      border: 1px solid #10b981;
+    }
+    .status-message.error {
+      background: #fee2e2;
+      color: #991b1b;
+      border: 1px solid #ef4444;
+    }
+  </style>
+</body>
+</html>

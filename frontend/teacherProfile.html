@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Teacher</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-wrapper {
+            max-width: 600px;
+            margin: 32px auto;
+            padding: 0 16px 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* ── Header card ── */
+        .profile-hero {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            border-radius: 16px;
+            padding: 32px 28px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            color: white;
+            box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+        }
+        .avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: white;
+            flex-shrink: 0;
+        }
+        .hero-info h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            margin-bottom: 4px;
+        }
+        .hero-info .dept {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-bottom: 2px;
+        }
+        .hero-info .emp-id {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            font-family: monospace;
+            letter-spacing: 0.05em;
+        }
+
+        /* ── Info card ── */
+        .info-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+        .info-card-title {
+            padding: 16px 22px 12px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .info-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 22px;
+            border-bottom: 1px solid #f8fafc;
+            gap: 14px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: #eff6ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+        .info-label {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+        }
+        .info-value {
+            font-size: 0.95rem;
+            color: #1e293b;
+            font-weight: 600;
+        }
+
+        /* ── Stats card ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 14px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .stat-card .num {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+        .stat-card .lbl {
+            font-size: 0.75rem;
+            color: #64748b;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ── Change password ── */
+        .change-pw-card {
+            background: white;
+            border-radius: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+        .change-pw-card .info-card-title { border-bottom: 1px solid #f1f5f9; }
+        .pw-form { padding: 18px 22px; display: flex; flex-direction: column; gap: 12px; }
+        .pw-input-wrap { position: relative; }
+        .pw-input-wrap input {
+            width: 100%;
+            padding: 10px 42px 10px 14px;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .pw-input-wrap input:focus { border-color: #2563eb; }
+        .pw-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+        .btn-save-pw {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            align-self: flex-start;
+        }
+        .btn-save-pw:hover { opacity: 0.9; }
+        .btn-save-pw:disabled { opacity: 0.6; cursor: not-allowed; }
+        .pw-msg { font-size: 0.85rem; font-weight: 600; min-height: 18px; }
+        .pw-msg.success { color: #16a34a; }
+        .pw-msg.error   { color: #dc2626; }
+
+        @media (max-width: 480px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .profile-hero { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <h1>👤 My Profile</h1>
+        <div class="nav-user">
+            <button onclick="window.location.href='dashboard.html'" class="btn-secondary">← Dashboard</button>
+            <button onclick="logout()" class="btn-secondary">Logout</button>
+        </div>
+    </div>
+</nav>
+
+<div class="profile-wrapper">
+
+    <!-- Hero -->
+    <div class="profile-hero">
+        <div class="avatar" id="avatarInitials">?</div>
+        <div class="hero-info">
+            <h2 id="heroName">Loading…</h2>
+            <div class="dept" id="heroDept"></div>
+            <div class="emp-id" id="heroEmpId"></div>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="num" id="statSheets">—</div>
+            <div class="lbl">Mark Sheets Saved</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statStudents">—</div>
+            <div class="lbl">Total Students</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" id="statPresent">—</div>
+            <div class="lbl">Present Today</div>
+        </div>
+    </div>
+
+    <!-- Details -->
+    <div class="info-card">
+        <div class="info-card-title">Account Details</div>
+        <div class="info-row">
+            <div class="info-icon">✉️</div>
+            <div>
+                <div class="info-label">Email</div>
+                <div class="info-value" id="infoEmail">—</div>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon">🏢</div>
+            <div>
+                <div class="info-label">Department</div>
+                <div class="info-value" id="infoDept">—</div>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon">🪪</div>
+            <div>
+                <div class="info-label">Employee ID</div>
+                <div class="info-value" id="infoEmpId">—</div>
+            </div>
+        </div>
+        <div class="info-row">
+            <div class="info-icon">📅</div>
+            <div>
+                <div class="info-label">Member Since</div>
+                <div class="info-value" id="infoSince">—</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password -->
+    <div class="change-pw-card">
+        <div class="info-card-title">🔒 Change Password</div>
+        <div class="pw-form">
+            <div class="pw-input-wrap">
+                <input type="password" id="currentPw" placeholder="Current password">
+                <button class="pw-toggle" onclick="togglePw('currentPw')">👁</button>
+            </div>
+            <div class="pw-input-wrap">
+                <input type="password" id="newPw" placeholder="New password (min 6 characters)">
+                <button class="pw-toggle" onclick="togglePw('newPw')">👁</button>
+            </div>
+            <div class="pw-input-wrap">
+                <input type="password" id="confirmPw" placeholder="Confirm new password">
+                <button class="pw-toggle" onclick="togglePw('confirmPw')">👁</button>
+            </div>
+            <div class="pw-msg" id="pwMsg"></div>
+            <button class="btn-save-pw" id="savePwBtn" onclick="changePassword()">Update Password</button>
+        </div>
+    </div>
+
+</div>
+
+<script src="app.js"></script>
+<script>
+    const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/teacher`;
+    const token = localStorage.getItem('token');
+
+    window.addEventListener('DOMContentLoaded', async () => {
+        const teacher = await teacherAuth();
+        if (!teacher) return;
+
+        // Fill profile
+        const initials = teacher.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        document.getElementById('avatarInitials').textContent = initials;
+        document.getElementById('heroName').textContent = teacher.name;
+        document.getElementById('heroDept').textContent = teacher.department;
+        document.getElementById('heroEmpId').textContent = 'ID: ' + teacher.employeeId;
+        document.getElementById('infoEmail').textContent = teacher.email;
+        document.getElementById('infoDept').textContent = teacher.department;
+        document.getElementById('infoEmpId').textContent = teacher.employeeId;
+
+        // Save email for password gate
+        localStorage.setItem('teacherEmail', teacher.email);
+
+        loadStats();
+    });
+
+    async function loadStats() {
+        try {
+            // Mark sheets count
+            const r1 = await fetch(`${API}/mark-entries?limit=1`, { headers: { Authorization: `Bearer ${token}` } });
+            if (r1.ok) {
+                const d1 = await r1.json();
+                document.getElementById('statSheets').textContent = d1.total || 0;
+            }
+
+            // Today's attendance summary
+            const today = new Date().toISOString().split('T')[0];
+            const r2 = await fetch(`${API}/attendance-summary?date=${today}`, { headers: { Authorization: `Bearer ${token}` } });
+            if (r2.ok) {
+                const d2 = await r2.json();
+                document.getElementById('statStudents').textContent = d2.totalStudents || 0;
+                document.getElementById('statPresent').textContent = d2.present || 0;
+            }
+        } catch (_) {}
+    }
+
+    function togglePw(id) {
+        const inp = document.getElementById(id);
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    async function changePassword() {
+        const currentPw = document.getElementById('currentPw').value.trim();
+        const newPw     = document.getElementById('newPw').value.trim();
+        const confirmPw = document.getElementById('confirmPw').value.trim();
+        const msgEl     = document.getElementById('pwMsg');
+        const btn       = document.getElementById('savePwBtn');
+
+        msgEl.className = 'pw-msg';
+        msgEl.textContent = '';
+
+        if (!currentPw || !newPw || !confirmPw) {
+            msgEl.className = 'pw-msg error';
+            msgEl.textContent = 'Please fill in all password fields.';
+            return;
+        }
+        if (newPw.length < 6) {
+            msgEl.className = 'pw-msg error';
+            msgEl.textContent = 'New password must be at least 6 characters.';
+            return;
+        }
+        if (newPw !== confirmPw) {
+            msgEl.className = 'pw-msg error';
+            msgEl.textContent = 'New passwords do not match.';
+            return;
+        }
+        if (currentPw === newPw) {
+            msgEl.className = 'pw-msg error';
+            msgEl.textContent = 'New password must be different from current password.';
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Updating…';
+
+        try {
+            const email = localStorage.getItem('teacherEmail');
+            // Verify current password first
+            const verifyRes = await fetch(`${API}/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password: currentPw })
+            });
+
+            if (!verifyRes.ok) {
+                msgEl.className = 'pw-msg error';
+                msgEl.textContent = 'Current password is incorrect.';
+                btn.disabled = false;
+                btn.textContent = 'Update Password';
+                return;
+            }
+
+            // Change password
+            const changeRes = await fetch(`${API}/change-password`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ currentPassword: currentPw, newPassword: newPw })
+            });
+
+            const data = await changeRes.json();
+
+            if (changeRes.ok) {
+                msgEl.className = 'pw-msg success';
+                msgEl.textContent = '✅ Password updated successfully!';
+                document.getElementById('currentPw').value = '';
+                document.getElementById('newPw').value = '';
+                document.getElementById('confirmPw').value = '';
+                // Update stored token with new one if returned
+                if (data.token) localStorage.setItem('token', data.token);
+            } else {
+                msgEl.className = 'pw-msg error';
+                msgEl.textContent = data.error || 'Failed to update password.';
+            }
+        } catch (err) {
+            msgEl.className = 'pw-msg error';
+            msgEl.textContent = 'Network error. Please try again.';
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Update Password';
+        }
+    }
+</script>
+
+</body>
+</html>

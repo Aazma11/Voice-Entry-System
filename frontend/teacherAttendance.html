@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance List</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f0f4f8;
+            min-height: 100vh;
+        }
+
+        /* ── Navbar ── */
+        .navbar {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            color: white;
+            padding: 0 20px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .navbar h1 { font-size: 1.2rem; font-weight: 700; }
+        .navbar-right { display: flex; align-items: center; gap: 12px; }
+        .btn-back {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 7px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-back:hover { background: rgba(255,255,255,0.25); }
+
+        /* ── Container ── */
+        .container {
+            max-width: 1200px;
+            margin: 24px auto;
+            padding: 0 16px;
+        }
+
+        /* ── Summary Cards ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .summary-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+        }
+        .summary-card .value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1e3a5f;
+        }
+        .summary-card .label {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+        .summary-card.present .value { color: #16a34a; }
+        .summary-card.absent .value  { color: #dc2626; }
+
+        /* ── Filter Bar ── */
+        .filter-card {
+            background: white;
+            border-radius: 12px;
+            padding: 18px 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            margin-bottom: 20px;
+        }
+        .filter-card h3 {
+            font-size: 0.95rem;
+            color: #374151;
+            margin-bottom: 14px;
+            font-weight: 700;
+        }
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            min-width: 150px;
+        }
+        .filter-group label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #6b7280;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+        .filter-group input,
+        .filter-group select {
+            padding: 9px 12px;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #1f2937;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .filter-group input:focus,
+        .filter-group select:focus { border-color: #2563eb; }
+        .btn-filter {
+            padding: 9px 22px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            align-self: flex-end;
+        }
+        .btn-filter:hover { background: #1d4ed8; }
+        .btn-reset {
+            padding: 9px 18px;
+            background: #f3f4f6;
+            color: #374151;
+            border: 1.5px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            align-self: flex-end;
+        }
+        .btn-reset:hover { background: #e5e7eb; }
+        .btn-export {
+            padding: 9px 18px;
+            background: #16a34a;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            align-self: flex-end;
+        }
+        .btn-export:hover { background: #15803d; }
+
+        /* ── Table ── */
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+            overflow: hidden;
+        }
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        .table-header h3 { font-size: 1rem; color: #1e3a5f; font-weight: 700; }
+        .record-count { font-size: 0.85rem; color: #64748b; }
+
+        .table-wrapper { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+        thead th {
+            background: #f8fafc;
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-bottom: 1px solid #e2e8f0;
+            white-space: nowrap;
+        }
+        tbody tr {
+            border-bottom: 1px solid #f1f5f9;
+            transition: background 0.15s;
+        }
+        tbody tr:hover { background: #f8fafc; }
+        tbody td {
+            padding: 12px 14px;
+            color: #374151;
+            vertical-align: middle;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .badge-present { background: #dcfce7; color: #16a34a; }
+        .badge-absent  { background: #fee2e2; color: #dc2626; }
+        .badge-late    { background: #fef3c7; color: #d97706; }
+        .badge-morning { background: #dbeafe; color: #1d4ed8; }
+        .badge-evening { background: #ede9fe; color: #7c3aed; }
+        .badge-face-ok { background: #dcfce7; color: #16a34a; }
+        .badge-face-no { background: #fee2e2; color: #dc2626; }
+
+        /* ── Pagination ── */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            padding: 16px;
+            border-top: 1px solid #f1f5f9;
+        }
+        .page-btn {
+            padding: 6px 14px;
+            border: 1.5px solid #d1d5db;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #374151;
+            transition: all 0.2s;
+        }
+        .page-btn:hover:not(:disabled) { border-color: #2563eb; color: #2563eb; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+        .page-btn.active { background: #2563eb; color: white; border-color: #2563eb; }
+        .page-info { font-size: 0.85rem; color: #64748b; padding: 0 8px; }
+
+        /* ── Empty / Loading ── */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #94a3b8;
+        }
+        .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-state p { font-size: 1rem; }
+
+        .loading-row td {
+            text-align: center;
+            padding: 40px;
+            color: #94a3b8;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .navbar h1 { font-size: 1rem; }
+            .summary-grid { grid-template-columns: repeat(2, 1fr); }
+            thead th:nth-child(5),
+            tbody td:nth-child(5),
+            thead th:nth-child(7),
+            tbody td:nth-child(7) { display: none; }
+        }
+
+        /* ── Password Gate Overlay ── */
+        #passwordGate {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #2563eb 100%);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        #passwordGate.hidden { display: none; }
+
+        .gate-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+            text-align: center;
+            animation: gateIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes gateIn {
+            from { transform: scale(0.85); opacity: 0; }
+            to   { transform: scale(1);    opacity: 1; }
+        }
+        .gate-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+        .gate-card h2 {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            margin-bottom: 6px;
+        }
+        .gate-card p {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 28px;
+        }
+        .gate-input-wrap {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        .gate-input-wrap input {
+            width: 100%;
+            padding: 13px 46px 13px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            color: #1f2937;
+            outline: none;
+            transition: border-color 0.2s;
+            letter-spacing: 0.1em;
+        }
+        .gate-input-wrap input:focus { border-color: #2563eb; }
+        .gate-input-wrap input.error { border-color: #dc2626; }
+        .toggle-pw {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #94a3b8;
+            padding: 0;
+            line-height: 1;
+        }
+        .gate-error {
+            color: #dc2626;
+            font-size: 0.85rem;
+            margin-bottom: 14px;
+            min-height: 20px;
+            font-weight: 600;
+        }
+        .btn-unlock {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-unlock:hover { opacity: 0.92; }
+        .btn-unlock:active { transform: scale(0.98); }
+        .btn-unlock:disabled { opacity: 0.6; cursor: not-allowed; }
+        .gate-attempts {
+            margin-top: 16px;
+            font-size: 0.8rem;
+            color: #94a3b8;
+        }
+        .gate-attempts span { color: #dc2626; font-weight: 700; }
+
+        /* Lock button in navbar */
+        .btn-lock {
+            background: rgba(255,255,255,0.15);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.3);
+            padding: 7px 14px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+        .btn-lock:hover { background: rgba(220,38,38,0.5); }
+
+        /* Blur content while locked */
+        #mainContent { transition: filter 0.3s; }
+        #mainContent.blurred { filter: blur(6px); pointer-events: none; user-select: none; }
+    </style>
+</head>
+<body>
+
+<!-- ── Password Gate Overlay ── -->
+<div id="passwordGate">
+    <div class="gate-card">
+        <div class="gate-icon">🔒</div>
+        <h2>Attendance Access</h2>
+        <p>This page is protected. Enter your teacher account password to continue.</p>
+
+        <div class="gate-input-wrap">
+            <input type="password" id="gatePassword" placeholder="Enter your password"
+                   onkeydown="if(event.key==='Enter') unlockPage()">
+            <button class="toggle-pw" onclick="toggleGatePw()" title="Show/hide password">👁</button>
+        </div>
+        <div class="gate-error" id="gateError"></div>
+
+        <button class="btn-unlock" id="unlockBtn" onclick="unlockPage()">
+            🔓 Unlock Attendance
+        </button>
+        <div class="gate-attempts">
+            Failed attempts: <span id="attemptCount">0</span> / 5
+        </div>
+    </div>
+</div>
+
+<nav class="navbar">
+    <h1>📋 Student Attendance</h1>
+    <div class="navbar-right">
+        <span id="teacherName" style="font-size:0.85rem;opacity:0.85;"></span>
+        <button class="btn-lock" onclick="lockPage()" title="Lock this page">🔒 Lock</button>
+        <button class="btn-back" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+    </div>
+</nav>
+
+<div id="mainContent" class="blurred">
+<div class="container">
+
+    <!-- Summary Cards -->
+    <div class="summary-grid">
+        <div class="summary-card">
+            <div class="value" id="totalStudents">—</div>
+            <div class="label">Total Students</div>
+        </div>
+        <div class="summary-card present">
+            <div class="value" id="presentCount">—</div>
+            <div class="label">Present Today</div>
+        </div>
+        <div class="summary-card absent">
+            <div class="value" id="absentCount">—</div>
+            <div class="label">Absent Today</div>
+        </div>
+        <div class="summary-card">
+            <div class="value" id="totalRecords">—</div>
+            <div class="label">Records Shown</div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-card">
+        <h3>🔍 Filter Records</h3>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Date</label>
+                <input type="date" id="filterDate">
+            </div>
+            <div class="filter-group">
+                <label>Student Name</label>
+                <input type="text" id="filterName" placeholder="Search name…">
+            </div>
+            <div class="filter-group">
+                <label>Roll Number</label>
+                <input type="text" id="filterRoll" placeholder="Search roll…">
+            </div>
+            <div class="filter-group" style="max-width:140px;">
+                <label>Status</label>
+                <select id="filterStatus">
+                    <option value="">All</option>
+                    <option value="Present">Present</option>
+                    <option value="Absent">Absent</option>
+                    <option value="Late">Late</option>
+                </select>
+            </div>
+            <button class="btn-filter" onclick="applyFilters()">Search</button>
+            <button class="btn-reset" onclick="resetFilters()">Reset</button>
+            <button class="btn-export" onclick="exportCSV()">⬇ Export Excel</button>
+        </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-card">
+        <div class="table-header">
+            <h3>Attendance Records</h3>
+            <span class="record-count" id="recordCount">Loading…</span>
+        </div>
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Student Name</th>
+                        <th>Roll No</th>
+                        <th>Year</th>
+                        <th>Date</th>
+                        <th>Slot</th>
+                        <th>Status</th>
+                        <th>Location</th>
+                        <th>Face</th>
+                        <th>Marked At</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceBody">
+                    <tr class="loading-row"><td colspan="10">Loading attendance records…</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="pagination" id="pagination"></div>
+    </div>
+
+</div>
+</div> <!-- end #mainContent -->
+
+<script>
+    const API_BASE = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/teacher`;
+    const token = localStorage.getItem('token');
+
+    let currentPage = 1;
+    let totalPages = 1;
+    let allRecordsCache = [];
+    let failedAttempts = 0;
+    const MAX_ATTEMPTS = 5;
+    const LOCKOUT_MS = 30000; // 30 seconds lockout after max attempts
+    let isLockedOut = false;
+
+    // ── Auth guard (role check — blocks students) ──
+    (function() {
+        const role = localStorage.getItem('role');
+        if (!token || role === 'student') { window.location.href = 'login.html'; }
+    })();
+
+    // ── Password Gate Logic ──
+    function toggleGatePw() {
+        const inp = document.getElementById('gatePassword');
+        inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    async function unlockPage() {
+        if (isLockedOut) return;
+
+        const password = document.getElementById('gatePassword').value.trim();
+        const errorEl  = document.getElementById('gateError');
+        const btn      = document.getElementById('unlockBtn');
+
+        if (!password) {
+            errorEl.textContent = 'Please enter your password.';
+            document.getElementById('gatePassword').classList.add('error');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Verifying…';
+        errorEl.textContent = '';
+
+        try {
+            // Verify by calling login endpoint with stored email + entered password
+            const email = localStorage.getItem('teacherEmail');
+            if (!email) {
+                // Fallback: verify token still valid (password already checked at login)
+                // Just check profile endpoint is reachable
+                const r = await fetch(`${API_BASE}/profile`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (r.ok) {
+                    grantAccess();
+                    return;
+                }
+                throw new Error('Session expired. Please log in again.');
+            }
+
+            const r = await fetch(`${API_BASE.replace('/api/teacher','')}/api/teacher/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            const data = await r.json();
+
+            if (r.ok && data.token) {
+                // Update token with fresh one
+                localStorage.setItem('token', data.token);
+                grantAccess();
+            } else {
+                handleFailedAttempt(data.error || 'Incorrect password. Please try again.');
+            }
+        } catch (err) {
+            handleFailedAttempt(err.message || 'Network error. Please try again.');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '🔓 Unlock Attendance';
+        }
+    }
+
+    function handleFailedAttempt(message) {
+        failedAttempts++;
+        document.getElementById('attemptCount').textContent = failedAttempts;
+        document.getElementById('gatePassword').value = '';
+        document.getElementById('gatePassword').classList.add('error');
+        document.getElementById('gateError').textContent = message;
+
+        if (failedAttempts >= MAX_ATTEMPTS) {
+            isLockedOut = true;
+            const btn = document.getElementById('unlockBtn');
+            btn.disabled = true;
+            document.getElementById('gatePassword').disabled = true;
+            let secs = LOCKOUT_MS / 1000;
+            document.getElementById('gateError').textContent = `Too many failed attempts. Try again in ${secs}s.`;
+            const timer = setInterval(() => {
+                secs--;
+                document.getElementById('gateError').textContent = `Too many failed attempts. Try again in ${secs}s.`;
+                if (secs <= 0) {
+                    clearInterval(timer);
+                    isLockedOut = false;
+                    failedAttempts = 0;
+                    document.getElementById('attemptCount').textContent = '0';
+                    document.getElementById('gatePassword').disabled = false;
+                    btn.disabled = false;
+                    document.getElementById('gateError').textContent = '';
+                    document.getElementById('gatePassword').classList.remove('error');
+                }
+            }, 1000);
+        }
+    }
+
+    function grantAccess() {
+        document.getElementById('passwordGate').classList.add('hidden');
+        document.getElementById('mainContent').classList.remove('blurred');
+        document.getElementById('gatePassword').value = '';
+        document.getElementById('gateError').textContent = '';
+        document.getElementById('gatePassword').classList.remove('error');
+        failedAttempts = 0;
+        document.getElementById('attemptCount').textContent = '0';
+    }
+
+    function lockPage() {
+        document.getElementById('passwordGate').classList.remove('hidden');
+        document.getElementById('mainContent').classList.add('blurred');
+        document.getElementById('gatePassword').value = '';
+        document.getElementById('gateError').textContent = '';
+        document.getElementById('gatePassword').classList.remove('error');
+        setTimeout(() => document.getElementById('gatePassword').focus(), 100);
+    }
+
+    // ── Init ──
+    window.addEventListener('DOMContentLoaded', () => {
+        // Set today's date as default
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('filterDate').value = today;
+
+        // Focus password field
+        document.getElementById('gatePassword').focus();
+
+        loadTeacherName();
+        loadSummary(today);
+        loadAttendance();
+    });
+
+    async function loadTeacherName() {
+        try {
+            const r = await fetch(`${API_BASE}/profile`, { headers: { Authorization: `Bearer ${token}` } });
+            if (r.ok) {
+                const d = await r.json();
+                document.getElementById('teacherName').textContent = d.teacher.name;
+            }
+        } catch (_) {}
+    }
+
+    async function loadSummary(date) {
+        try {
+            const url = `${API_BASE}/attendance-summary${date ? '?date=' + date : ''}`;
+            const r = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+            if (r.ok) {
+                const d = await r.json();
+                document.getElementById('totalStudents').textContent = d.totalStudents;
+                document.getElementById('presentCount').textContent = d.present;
+                document.getElementById('absentCount').textContent = d.absent;
+            }
+        } catch (_) {}
+    }
+
+    async function loadAttendance(page = 1) {
+        currentPage = page;
+        const date = document.getElementById('filterDate').value;
+        const name = document.getElementById('filterName').value.trim();
+        const roll = document.getElementById('filterRoll').value.trim();
+        const status = document.getElementById('filterStatus').value;
+
+        const params = new URLSearchParams({ page, limit: 50 });
+        if (date)   params.set('date', date);
+        if (name)   params.set('studentName', name);
+        if (roll)   params.set('rollNumber', roll);
+        if (status) params.set('status', status);
+
+        const tbody = document.getElementById('attendanceBody');
+        tbody.innerHTML = '<tr class="loading-row"><td colspan="10">Loading…</td></tr>';
+
+        try {
+            const r = await fetch(`${API_BASE}/attendance-list?${params}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (r.status === 401) { window.location.href = 'login.html'; return; }
+
+            const data = await r.json();
+            if (!data.success) throw new Error(data.error);
+
+            allRecordsCache = data.records;
+            totalPages = data.pages;
+
+            document.getElementById('recordCount').textContent =
+                `${data.total} record${data.total !== 1 ? 's' : ''} found`;
+            document.getElementById('totalRecords').textContent = data.total;
+
+            renderTable(data.records, (page - 1) * 50);
+            renderPagination(data.total, page, 50);
+
+            // Update summary for selected date
+            if (date) loadSummary(date);
+
+        } catch (err) {
+            tbody.innerHTML = `<tr class="loading-row"><td colspan="10" style="color:#dc2626;">Error: ${err.message}</td></tr>`;
+        }
+    }
+
+    function renderTable(records, offset) {
+        const tbody = document.getElementById('attendanceBody');
+        if (!records.length) {
+            tbody.innerHTML = `
+                <tr><td colspan="10">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>No attendance records found for the selected filters.</p>
+                    </div>
+                </td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = records.map((r, i) => {
+            const date = formatDate(r.date);
+            const markedAt = formatTime(r.markedAt);
+
+            const statusBadge = r.status === 'Present'
+                ? `<span class="badge badge-present">Present</span>`
+                : r.status === 'Late'
+                ? `<span class="badge badge-late">Late</span>`
+                : `<span class="badge badge-absent">Absent</span>`;
+
+            const slotBadge = r.slot === 'morning'
+                ? `<span class="badge badge-morning">Morning</span>`
+                : `<span class="badge badge-evening">Evening</span>`;
+
+            const faceBadge = r.faceVerified
+                ? `<span class="badge badge-face-ok">✓ Yes</span>`
+                : `<span class="badge badge-face-no">✗ No</span>`;
+
+            return `<tr>
+                <td style="color:#94a3b8;font-size:0.8rem;">${offset + i + 1}</td>
+                <td><strong>${escHtml(r.studentName)}</strong></td>
+                <td style="font-family:monospace;">${escHtml(r.rollNumber)}</td>
+                <td>${escHtml(r.year)}</td>
+                <td style="white-space:nowrap;">${date}</td>
+                <td>${slotBadge}</td>
+                <td>${statusBadge}</td>
+                <td style="max-width:180px;font-size:0.8rem;color:#64748b;word-break:break-word;">${escHtml(r.location)}</td>
+                <td>${faceBadge}</td>
+                <td style="white-space:nowrap;font-size:0.8rem;color:#64748b;">${markedAt}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    function renderPagination(total, page, limit) {
+        const pages = Math.ceil(total / limit);
+        totalPages = pages;
+        const el = document.getElementById('pagination');
+        if (pages <= 1) { el.innerHTML = ''; return; }
+
+        let html = `<button class="page-btn" onclick="loadAttendance(${page - 1})" ${page <= 1 ? 'disabled' : ''}>‹ Prev</button>`;
+        html += `<span class="page-info">Page ${page} of ${pages}</span>`;
+        html += `<button class="page-btn" onclick="loadAttendance(${page + 1})" ${page >= pages ? 'disabled' : ''}>Next ›</button>`;
+        el.innerHTML = html;
+    }
+
+    function applyFilters() { loadAttendance(1); }
+
+    function resetFilters() {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('filterDate').value = today;
+        document.getElementById('filterName').value = '';
+        document.getElementById('filterRoll').value = '';
+        document.getElementById('filterStatus').value = '';
+        loadAttendance(1);
+    }
+
+    // ── Excel Export (SheetJS) ──
+    function exportCSV() {
+        if (!allRecordsCache.length) { alert('No records to export.'); return; }
+
+        const filterDate = document.getElementById('filterDate').value || new Date().toISOString().split('T')[0];
+
+        // Build rows as plain objects
+        const data = allRecordsCache.map((r, i) => ({
+            '#':              i + 1,
+            'Student Name':   r.studentName,
+            'Roll No':        r.rollNumber,
+            'Year':           r.year,
+            'Date':           formatDate(r.date),   // plain text DD/MM/YYYY
+            'Slot':           r.slot,
+            'Status':         r.status,
+            'Location':       r.location,
+            'Face Verified':  r.faceVerified ? 'Yes' : 'No',
+            'Marked At':      formatTime(r.markedAt)
+        }));
+
+        // Use SheetJS to create workbook
+        const ws = XLSX.utils.json_to_sheet(data);
+
+        // Force Date and Marked At columns to be plain text (type 's')
+        // so Excel never shows ########
+        const dateCol = 'E';   // column index 5 = Date
+        const timeCol = 'J';   // column index 10 = Marked At
+        const rowCount = data.length + 1; // +1 for header
+        for (let row = 2; row <= rowCount; row++) {
+            const dCell = ws[`${dateCol}${row}`];
+            if (dCell) { dCell.t = 's'; dCell.z = '@'; }
+            const tCell = ws[`${timeCol}${row}`];
+            if (tCell) { tCell.t = 's'; tCell.z = '@'; }
+        }
+
+        // Set column widths so nothing is hidden
+        ws['!cols'] = [
+            { wch: 4  },  // #
+            { wch: 22 },  // Student Name
+            { wch: 12 },  // Roll No
+            { wch: 10 },  // Year
+            { wch: 13 },  // Date
+            { wch: 10 },  // Slot
+            { wch: 10 },  // Status
+            { wch: 30 },  // Location
+            { wch: 13 },  // Face Verified
+            { wch: 12 },  // Marked At
+        ];
+
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Attendance');
+        XLSX.writeFile(wb, `attendance_${filterDate}.xlsx`);
+    }
+
+    // Format date as DD/MM/YYYY — stored as plain text so Excel won't auto-format it
+    function formatDate(isoStr) {
+        if (!isoStr) return '-';
+        const d = new Date(isoStr);
+        const day   = String(d.getDate()).padStart(2, '0');
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const year  = d.getFullYear();
+        return `${day}/${month}/${year}`;
+    }
+
+    // Format time only as HH:MM AM/PM
+    function formatTime(isoStr) {
+        if (!isoStr) return '-';
+        const d = new Date(isoStr);
+        let hours = d.getHours();
+        const mins = String(d.getMinutes()).padStart(2, '0');
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+        return `${hours}:${mins} ${ampm}`;
+    }
+
+    function escHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // Allow pressing Enter in filter inputs
+    ['filterDate','filterName','filterRoll','filterStatus'].forEach(id => {
+        document.getElementById(id)?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') applyFilters();
+        });
+    });
+</script>
+
+<!-- SheetJS for Excel export -->
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

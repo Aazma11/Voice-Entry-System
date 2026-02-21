@@ -1,0 +1,682 @@
+<!-- frontend/student/profile.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Student</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .profile-wrapper {
+            max-width: 700px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            padding-bottom: 2rem;
+        }
+
+        /* ── Profile Card ── */
+        .profile-card {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .profile-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .avatar-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: #fff;
+            font-weight: 700;
+            flex-shrink: 0;
+            border: 3px solid rgba(255,255,255,0.5);
+            overflow: hidden;
+        }
+
+        .avatar-circle img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .profile-header-info h2 {
+            color: #fff;
+            font-size: 1.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-header-info p {
+            color: rgba(255,255,255,0.8);
+            font-size: 0.9rem;
+        }
+
+        .profile-body {
+            padding: 1.5rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-item label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-item span {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+            background: var(--bg-light);
+            padding: 0.6rem 0.875rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            word-break: break-all;
+        }
+
+        /* ── Face Verification Card ── */
+        .face-card {
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+
+        .face-card-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .face-card-header h3 {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+        }
+
+        .badge-set {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.3rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .badge-set.set {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge-set.not-set {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .face-card-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        /* preview area */
+        .face-preview-area {
+            width: 100%;
+            aspect-ratio: 4/3;
+            max-height: 300px;
+            background: #f3f4f6;
+            border: 2px dashed #d1d5db;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .face-preview-area video,
+        .face-preview-area img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 0.625rem;
+        }
+
+        .face-preview-area .placeholder-text {
+            text-align: center;
+            color: #9ca3af;
+            padding: 1rem;
+        }
+
+        .face-preview-area .placeholder-text span {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
+        }
+
+        canvas#captureCanvas { display: none; }
+
+        /* tab switcher */
+        .method-tabs {
+            display: flex;
+            gap: 0.5rem;
+            background: var(--bg-light);
+            padding: 0.25rem;
+            border-radius: 0.5rem;
+        }
+
+        .method-tab {
+            flex: 1;
+            padding: 0.625rem;
+            border: none;
+            background: transparent;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .method-tab.active {
+            background: #fff;
+            color: var(--primary-color);
+            box-shadow: var(--shadow-sm);
+            font-weight: 600;
+        }
+
+        /* action buttons row */
+        .face-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+
+        .face-actions button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        /* hidden file input */
+        #fileInput { display: none; }
+
+        /* status */
+        .face-status {
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .face-status.success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+            display: block;
+        }
+
+        .face-status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+            display: block;
+        }
+
+        .face-status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+            display: block;
+        }
+
+        /* ── Buttons (reuse global + extras) ── */
+        .btn-primary, .btn-secondary, .btn-success {
+            padding: 0.75rem 1.25rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.9375rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+        }
+
+        .btn-primary { background: var(--primary-color); color: #fff; }
+        .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-secondary { background: var(--bg-light); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: #e2e8f0; }
+
+        .btn-success { background: var(--success-color); color: #fff; }
+        .btn-success:hover:not(:disabled) { background: #059669; }
+        .btn-success:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .btn-danger { background: var(--danger-color); color: #fff; padding: 0.75rem 1.25rem; border: none; border-radius: 0.5rem; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
+        .btn-danger:hover { background: #dc2626; }
+
+        /* ── Responsive ── */
+        @media (max-width: 600px) {
+            .info-grid { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; text-align: center; }
+            .face-actions { flex-direction: column; }
+            .face-actions button { min-width: unset; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <h1>My Profile</h1>
+            <div class="nav-user">
+                <button onclick="window.location.href='../studentDashboard.html'" class="btn-secondary">
+                    ← Dashboard
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="profile-wrapper">
+
+            <!-- ── Profile Info Card ── -->
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="avatar-circle" id="avatarCircle">
+                        <span id="avatarInitial">?</span>
+                    </div>
+                    <div class="profile-header-info">
+                        <h2 id="profileName">Loading…</h2>
+                    </div>
+                </div>
+                <div class="profile-body">
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Roll Number</label>
+                            <span id="profileRoll">—</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Year</label>
+                            <span id="profileYear">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── Face Verification Card ── -->
+            <div class="face-card">
+                <div class="face-card-header">
+                    <h3>Face Verification Image</h3>
+                    <span class="badge-set not-set" id="faceBadge">Not Set</span>
+                </div>
+                <div class="face-card-body">
+
+                    <p style="color: var(--text-secondary); font-size: 0.9rem;">
+                        This image is used to verify your identity when marking attendance.
+                        Capture a clear photo of your face in good lighting.
+                    </p>
+
+                    <!-- Method Tabs -->
+                    <div class="method-tabs">
+                        <button class="method-tab active" id="tabCamera" onclick="switchTab('camera')">
+                            📷 Use Camera
+                        </button>
+                        <button class="method-tab" id="tabUpload" onclick="switchTab('upload')">
+                            📁 Upload Photo
+                        </button>
+                    </div>
+
+                    <!-- Preview Area -->
+                    <div class="face-preview-area" id="previewArea">
+                        <div class="placeholder-text">
+                            <span>🤳</span>
+                            <p>Camera or uploaded photo will appear here</p>
+                        </div>
+                    </div>
+
+                    <canvas id="captureCanvas"></canvas>
+
+                    <!-- Camera Controls -->
+                    <div id="cameraControls" class="face-actions">
+                        <button class="btn-primary" id="startCamBtn" onclick="startCamera()">
+                            📷 Start Camera
+                        </button>
+                        <button class="btn-secondary" id="captureBtn" onclick="capturePhoto()" disabled>
+                            📸 Capture Photo
+                        </button>
+                    </div>
+
+                    <!-- Upload Controls -->
+                    <div id="uploadControls" class="face-actions" style="display:none;">
+                        <input type="file" id="fileInput" accept="image/*" onchange="handleFileUpload(event)">
+                        <button class="btn-primary" onclick="document.getElementById('fileInput').click()">
+                            📁 Choose Photo
+                        </button>
+                    </div>
+
+                    <!-- Save / Retake row (shown after capture/upload) -->
+                    <div id="saveRow" class="face-actions" style="display:none;">
+                        <button class="btn-success" id="saveBtn" onclick="saveFaceImage()">
+                            ✅ Save as Verification Image
+                        </button>
+                        <button class="btn-secondary" onclick="resetCapture()">
+                            🔄 Retake / Change
+                        </button>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="face-status" id="faceStatus"></div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- face-api.js from CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="../studentApp.js"></script>
+    <script>
+        const API = `${window.location.protocol}//${window.location.hostname}:${window.location.port || '5000'}/api/student`;
+        const MODELS_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model';
+
+        let cameraStream    = null;
+        let capturedImage   = null;   // base64 for display / storage
+        let capturedDescriptor = null; // Float32Array(128) from face-api
+        let activeTab       = 'camera';
+        let modelsLoaded    = false;
+
+        // ── Load face-api models ───────────────────────────────────────────
+        async function loadModels() {
+            setStatus('Loading face recognition models… (first time may take a few seconds)', 'info');
+            try {
+                await Promise.all([
+                    faceapi.nets.ssdMobilenetv1.loadFromUri(MODELS_URL),
+                    faceapi.nets.faceLandmark68Net.loadFromUri(MODELS_URL),
+                    faceapi.nets.faceRecognitionNet.loadFromUri(MODELS_URL)
+                ]);
+                modelsLoaded = true;
+                setStatus('', '');
+            } catch (e) {
+                setStatus('Could not load face recognition models. Check your internet connection.', 'error');
+                console.error('Model load error:', e);
+            }
+        }
+
+        // ── Auth check + load profile ──────────────────────────────────────
+        window.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('token');
+            const role  = localStorage.getItem('role');
+            if (!token || role !== 'student') {
+                window.location.href = '../studentLogin.html';
+                return;
+            }
+            await loadProfile(token);
+            await loadModels();
+        });
+
+        async function loadProfile(token) {
+            try {
+                const res = await fetch(`${API}/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (!res.ok) { window.location.href = '../studentLogin.html'; return; }
+
+                const { student } = await res.json();
+
+                document.getElementById('profileName').textContent = student.name;
+                document.getElementById('profileRoll').textContent  = student.rollNumber;
+                document.getElementById('profileYear').textContent  = student.year;
+
+                document.getElementById('avatarInitial').textContent =
+                    student.name ? student.name.charAt(0).toUpperCase() : '?';
+
+                if (student.hasFaceImage) {
+                    const badge = document.getElementById('faceBadge');
+                    badge.textContent = student.hasFaceDescriptor ? '✓ Set (AI)' : '✓ Set';
+                    badge.className   = 'badge-set set';
+                }
+            } catch (e) {
+                console.error('Profile load error:', e);
+            }
+        }
+
+        // ── Tab switching ──────────────────────────────────────────────────
+        function switchTab(tab) {
+            activeTab = tab;
+            stopCamera();
+            resetCapture();
+            document.getElementById('tabCamera').classList.toggle('active', tab === 'camera');
+            document.getElementById('tabUpload').classList.toggle('active', tab === 'upload');
+            document.getElementById('cameraControls').style.display = tab === 'camera' ? 'flex' : 'none';
+            document.getElementById('uploadControls').style.display = tab === 'upload' ? 'flex' : 'none';
+        }
+
+        // ── Camera ─────────────────────────────────────────────────────────
+        async function startCamera() {
+            setStatus('', '');
+            const preview = document.getElementById('previewArea');
+            try {
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'user', width: { ideal: 640 }, height: { ideal: 480 } }
+                });
+                const video = document.createElement('video');
+                video.id = 'profileVideo';
+                video.srcObject = cameraStream;
+                video.autoplay  = true;
+                video.playsInline = true;
+                video.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:0.625rem;';
+                preview.innerHTML = '';
+                preview.appendChild(video);
+                document.getElementById('startCamBtn').disabled = true;
+                document.getElementById('captureBtn').disabled  = false;
+                setStatus('Camera started. Position your face clearly in the frame.', 'info');
+            } catch (err) {
+                setStatus('Could not access camera: ' + err.message, 'error');
+            }
+        }
+
+        async function capturePhoto() {
+            const video = document.getElementById('profileVideo');
+            if (!video) return;
+            const canvas = document.getElementById('captureCanvas');
+            canvas.width  = video.videoWidth  || 640;
+            canvas.height = video.videoHeight || 480;
+            canvas.getContext('2d').drawImage(video, 0, 0);
+            capturedImage = canvas.toDataURL('image/jpeg', 0.85);
+            stopCamera();
+            showCapturedPreview(capturedImage);
+            await extractDescriptor(canvas);
+        }
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(t => t.stop());
+                cameraStream = null;
+            }
+            document.getElementById('startCamBtn').disabled = false;
+            document.getElementById('captureBtn').disabled  = true;
+        }
+
+        // ── File upload ────────────────────────────────────────────────────
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                setStatus('Please select an image file.', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                capturedImage = e.target.result;
+                showCapturedPreview(capturedImage);
+                // Draw to hidden canvas for face-api detection
+                const img = new Image();
+                img.onload = async () => {
+                    const canvas = document.getElementById('captureCanvas');
+                    canvas.width  = img.width;
+                    canvas.height = img.height;
+                    canvas.getContext('2d').drawImage(img, 0, 0);
+                    await extractDescriptor(canvas);
+                };
+                img.src = capturedImage;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ── face-api descriptor extraction ────────────────────────────────
+        async function extractDescriptor(canvas) {
+            if (!modelsLoaded) {
+                setStatus('Face models still loading, please wait…', 'info');
+                return;
+            }
+            setStatus('Detecting face…', 'info');
+            try {
+                const detection = await faceapi
+                    .detectSingleFace(canvas, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.5 }))
+                    .withFaceLandmarks()
+                    .withFaceDescriptor();
+
+                if (!detection) {
+                    setStatus('No face detected. Please use a clear, well-lit photo facing the camera.', 'error');
+                    capturedDescriptor = null;
+                    document.getElementById('saveRow').style.display = 'none';
+                    return;
+                }
+
+                capturedDescriptor = Array.from(detection.descriptor); // Float32Array → plain array
+                setStatus('Face detected! Click "Save as Verification Image" to confirm.', 'info');
+                document.getElementById('saveRow').style.display = 'flex';
+            } catch (err) {
+                setStatus('Face detection error: ' + err.message, 'error');
+                console.error(err);
+            }
+        }
+
+        // ── Preview helpers ────────────────────────────────────────────────
+        function showCapturedPreview(src) {
+            const preview = document.getElementById('previewArea');
+            preview.innerHTML = '';
+            const img = document.createElement('img');
+            img.src = src;
+            img.alt = 'Captured face';
+            preview.appendChild(img);
+        }
+
+        function resetCapture() {
+            capturedImage      = null;
+            capturedDescriptor = null;
+            stopCamera();
+            document.getElementById('previewArea').innerHTML = `
+                <div class="placeholder-text">
+                    <span>🤳</span>
+                    <p>Camera or uploaded photo will appear here</p>
+                </div>`;
+            document.getElementById('saveRow').style.display = 'none';
+            document.getElementById('fileInput').value = '';
+            setStatus('', '');
+        }
+
+        // ── Save to backend ────────────────────────────────────────────────
+        async function saveFaceImage() {
+            if (!capturedImage) {
+                setStatus('No photo captured yet.', 'error');
+                return;
+            }
+            if (!capturedDescriptor) {
+                setStatus('No face detected in the photo. Please retake with a clear face photo.', 'error');
+                return;
+            }
+
+            const token   = localStorage.getItem('token');
+            const saveBtn = document.getElementById('saveBtn');
+            saveBtn.disabled    = true;
+            saveBtn.textContent = 'Saving…';
+
+            try {
+                const res = await fetch(`${API}/profile`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        faceDescriptor: capturedDescriptor
+                    })
+                });
+
+                const data = await res.json();
+
+                if (res.ok) {
+                    setStatus('✅ Face saved! AI face recognition is now active for your attendance.', 'success');
+
+                    const badge = document.getElementById('faceBadge');
+                    badge.textContent = '✓ Set (AI)';
+                    badge.className   = 'badge-set set';
+
+                    const avatarCircle = document.getElementById('avatarCircle');
+                    avatarCircle.innerHTML = '';
+                    const avatarImg = document.createElement('img');
+                    avatarImg.src = capturedImage;
+                    avatarImg.alt = 'Profile';
+                    avatarCircle.appendChild(avatarImg);
+
+                    document.getElementById('saveRow').style.display = 'none';
+                } else {
+                    setStatus(data.error || 'Failed to save image.', 'error');
+                }
+            } catch (err) {
+                setStatus('Network error. Please try again.', 'error');
+            } finally {
+                saveBtn.disabled    = false;
+                saveBtn.textContent = '✅ Save as Verification Image';
+            }
+        }
+
+        // ── Status helper ──────────────────────────────────────────────────
+        function setStatus(msg, type) {
+            const el = document.getElementById('faceStatus');
+            el.textContent = msg;
+            el.className   = msg ? `face-status ${type}` : 'face-status';
+        }
+    </script>
+</body>
+</html>
