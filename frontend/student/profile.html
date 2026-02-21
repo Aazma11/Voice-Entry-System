@@ -456,27 +456,52 @@
 
         async function loadProfile(token) {
             try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 10000);
+
                 const res = await fetch(`${API}/profile`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    signal: controller.signal
                 });
+                clearTimeout(timeout);
+
                 if (!res.ok) { window.location.href = '../studentLogin.html'; return; }
 
                 const { student } = await res.json();
 
-                document.getElementById('profileName').textContent = student.name;
-                document.getElementById('profileRoll').textContent  = student.rollNumber;
-                document.getElementById('profileYear').textContent  = student.year;
+                document.getElementById('profileName').textContent = student.name || '—';
+                document.getElementById('profileRoll').textContent  = student.rollNumber || '—';
+                document.getElementById('profileYear').textContent  = student.year || '—';
 
                 document.getElementById('avatarInitial').textContent =
                     student.name ? student.name.charAt(0).toUpperCase() : '?';
 
-                if (student.hasFaceImage) {
+                if (student.hasFaceDescriptor) {
                     const badge = document.getElementById('faceBadge');
-                    badge.textContent = student.hasFaceDescriptor ? '✓ Set (AI)' : '✓ Set';
+                    badge.textContent = '✓ Set (AI)';
+                    badge.className   = 'badge-set set';
+                } else if (student.hasFaceImage) {
+                    const badge = document.getElementById('faceBadge');
+                    badge.textContent = '✓ Set';
                     badge.className   = 'badge-set set';
                 }
             } catch (e) {
                 console.error('Profile load error:', e);
+                // Show cached data from localStorage if available
+                const cached = localStorage.getItem('student');
+                if (cached) {
+                    const student = JSON.parse(cached);
+                    document.getElementById('profileName').textContent = student.name || '—';
+                    document.getElementById('profileRoll').textContent  = student.rollNumber || '—';
+                    document.getElementById('profileYear').textContent  = student.year || '—';
+                    document.getElementById('avatarInitial').textContent =
+                        student.name ? student.name.charAt(0).toUpperCase() : '?';
+                } else {
+                    document.getElementById('profileName').textContent = 'Could not load';
+                    document.getElementById('profileRoll').textContent  = '—';
+                    document.getElementById('profileYear').textContent  = '—';
+                    document.getElementById('avatarInitial').textContent = '?';
+                }
             }
         }
 

@@ -30,7 +30,7 @@ async function login(email, password) {
         }
     } catch (error) {
         console.error('Login error:', error);
-        showError('Network error. Make sure server is running on http://localhost:5000');
+        showError('Network error. Please check your internet connection and try again.');
         submitBtn.disabled = false;
         submitBtn.textContent = originalText;
     }
