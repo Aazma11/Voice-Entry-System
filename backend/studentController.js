@@ -354,8 +354,8 @@ const getAttendance = async (req, res) => {
   function validateLocation(location) {
     // VIGNAN'S INSTITUTE OF MANAGEMENT AND TECHNOLOGY FOR WOMEN
     // Ghatkesar, Kondapur, Telangana 501301
-    const CAMPUS_LAT =17.409818080377836;
-    const CAMPUS_LON = 78.60321060547018;
+    const CAMPUS_LAT =17.478089973944897;
+    const CAMPUS_LON = 78.69096997332908;
     const RADIUS_KM = 2; // 500 meters
   
     if (!location || !location.latitude || !location.longitude) {
