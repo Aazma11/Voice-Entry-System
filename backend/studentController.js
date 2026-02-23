@@ -400,13 +400,13 @@ const getAttendance = async (req, res) => {
     // Convert to minutes from midnight
     const totalMinutes = hours * 60 + minutes;
 
-    // Morning window: 08:00 – 12:00
-    const MORNING_START = 8 * 60;       // 08:00
-    const MORNING_END   = 12 * 60;      // 12:00
+    // Morning window: 08:30 - 9 : 30
+    const MORNING_START = 8 * 60 + 30;       // 08:30
+    const MORNING_END   = 9 * 60 + 30;      // 9:30
 
-    // Evening window: 12:01 – 23:59
-    const EVENING_START = 12 * 60 + 1;  // 12:01
-    const EVENING_END   = 23 * 60 + 59; // 23:59
+    // Evening window: 2 : 30 - 3 : 00
+    const EVENING_START = 14 * 60 + 30;  // 2 : 30
+    const EVENING_END   = 15 * 60 ; // 3 : 00
 
     if (totalMinutes >= MORNING_START && totalMinutes <= MORNING_END) {
       return 'morning';
