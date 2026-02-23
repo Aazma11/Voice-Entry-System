@@ -212,7 +212,7 @@ const markAttendance = async (req, res) => {
   
       if (!slot) {
         return res.status(400).json({
-          error: 'Attendance can only be marked between 8:00 AM – 12:00 PM (morning) or 12:01 PM – 11:59 PM (evening).'
+          error: 'Attendance can only be marked between 8:30 AM – 9:30 AM (morning) or 2:30 PM – 3:00 PM (evening).'
         });
       }
   
