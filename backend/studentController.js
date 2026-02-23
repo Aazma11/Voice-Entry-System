@@ -352,11 +352,10 @@ const getAttendance = async (req, res) => {
   
   // Helper function to validate location
   function validateLocation(location) {
-    // VIGNAN'S INSTITUTE OF MANAGEMENT AND TECHNOLOGY FOR WOMEN
-    // Ghatkesar, Kondapur, Telangana 501301
-    const CAMPUS_LAT =17.409954;
-    const CAMPUS_LON = 78.603195;
-    const RADIUS_KM = 2; // 500 meters
+    // VMTW - Ghatkesar, Telangana
+    const CAMPUS_LAT = 17.47698;
+    const CAMPUS_LON = 78.69184;
+    const RADIUS_KM = 2; // 2 km radius
   
     if (!location || !location.latitude || !location.longitude) {
       console.log('Location validation failed: Missing coordinates');
