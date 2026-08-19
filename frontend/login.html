@@ -4,13 +4,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Login - Smart Attendance System</title>
+    <title>Teacher Sign In — EduVoice</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="login-container">
         <div class="login-box">
-            <h2>Teacher Login</h2>
+            <a class="brand auth-brand" href="/">
+                <span class="brand-mark">E</span>
+                <span class="brand-copy">
+                    <strong>EduVoice</strong>
+                    <span>Smart Campus Suite</span>
+                </span>
+            </a>
+            <p class="auth-kicker">Faculty portal</p>
+            <h2>Teacher sign in</h2>
+            <p class="auth-lead">Voice mark entry, attendance review, and Excel export.</p>
             <form id="loginForm">
                 <div class="form-group">
                     <label for="email">Email</label>
@@ -20,16 +29,13 @@
                     <label for="password">Password</label>
                     <input type="password" id="password" name="password" required>
                 </div>
-                <button type="submit" class="btn-primary">Login</button>
+                <button type="submit" class="btn-primary">Sign in</button>
             </form>
             <div id="errorMessage" class="error-message"></div>
-            <div style="margin-top: 20px; text-align: center; display: flex; flex-direction: column; gap: 10px;">
-                <a href="teacherRegister.html" style="color: #2563eb; text-decoration: none; font-weight: 600;">
-                    Don't have an account? Register →
-                </a>
-                <a href="studentLogin.html" style="color: #64748b; text-decoration: none; font-size: 0.875rem;">
-                    Student Login →
-                </a>
+            <div class="auth-links">
+                <a href="teacherRegister.html">Create a faculty account →</a>
+                <a class="muted" href="studentLogin.html">Student sign in</a>
+                <a class="muted" href="/">Back to home</a>
             </div>
         </div>
     </div>

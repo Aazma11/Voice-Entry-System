@@ -4,21 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Dashboard</title>
+    <title>Student Dashboard — EduVoice</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1>Student Dashboard</h1>
+            <a class="brand" href="studentDashboard.html">
+                <span class="brand-mark">E</span>
+                <span class="brand-copy">
+                    <strong>EduVoice</strong>
+                    <span>Student workspace</span>
+                </span>
+            </a>
             <div class="nav-user">
                 <span id="studentName"></span>
-                <button onclick="logout()" class="btn-secondary">Logout</button>
+                <button onclick="logout()" class="btn-secondary">Sign out</button>
             </div>
         </div>
     </nav>
 
     <div class="container">
+        <div class="page-intro">
+            <h1>Student dashboard</h1>
+            <p>Set your face profile, mark attendance, and review your records.</p>
+        </div>
         <div class="dashboard-cards">
             <div class="card" onclick="window.location.href='student/profile.html'">
                 <h3>👤 My Profile</h3>

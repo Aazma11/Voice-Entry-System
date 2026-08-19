@@ -10,9 +10,15 @@
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1>Mark Attendance</h1>
+            <a class="brand" href="../studentDashboard.html">
+                <span class="brand-mark">E</span>
+                <span class="brand-copy">
+                    <strong>EduVoice</strong>
+                    <span>Mark attendance</span>
+                </span>
+            </a>
             <div class="nav-user">
-                <button onclick="window.location.href='../studentDashboard.html'" class="btn-secondary">Back to Dashboard</button>
+                <button onclick="window.location.href='../studentDashboard.html'" class="btn-secondary">Dashboard</button>
             </div>
         </div>
     </nav>
@@ -213,7 +219,7 @@ function showManualLocationInput() {
                     <input type="number" id="manualLon" placeholder="Longitude (e.g., 78.69184)" step="any"
                            style="flex: 1; min-width: 150px; padding: 8px; border: 2px solid #d1d5db; border-radius: 6px;">
                     <button onclick="useManualLocation()" 
-                            style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                            style="padding: 8px 16px; background: #0e1626; color: #fffcf7; border: none; border-radius: 999px; cursor: pointer; font-weight: 600;">
                         Use This Location
                     </button>
                 </div>
@@ -542,9 +548,10 @@ function handleCameraStream(cameraStream) {
             max-width: 800px;
             margin: 20px auto;
             padding: 30px;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            background: var(--white);
+            border-radius: 22px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--line);
         }
 
         .camera-section {

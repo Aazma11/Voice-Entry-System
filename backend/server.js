@@ -57,7 +57,7 @@ app.get('/api/health', (req, res) => {
 
 // Explicit routes for HTML pages
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend', 'login.html'));
+  res.sendFile(path.join(__dirname, '../frontend', 'index.html'));
 });
 
 app.get('/login.html', (req, res) => {

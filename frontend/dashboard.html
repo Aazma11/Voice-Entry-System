@@ -4,21 +4,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard</title>
+    <title>Teacher Dashboard — EduVoice</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <nav class="navbar">
         <div class="nav-container">
-            <h1>Teacher Dashboard</h1>
+            <a class="brand" href="dashboard.html">
+                <span class="brand-mark">E</span>
+                <span class="brand-copy">
+                    <strong>EduVoice</strong>
+                    <span>Teacher workspace</span>
+                </span>
+            </a>
             <div class="nav-user">
                 <span id="teacherName"></span>
-                <button onclick="logout()" class="btn-secondary">Logout</button>
+                <button onclick="logout()" class="btn-secondary">Sign out</button>
             </div>
         </div>
     </nav>
 
     <div class="container">
+        <div class="page-intro">
+            <h1>Teacher dashboard</h1>
+            <p>Choose a workspace to capture marks, review attendance, or export sheets.</p>
+        </div>
         <div class="dashboard-cards">
             <div class="card" onclick="window.location.href='teacherProfile.html'">
                 <h3>👤 My Profile</h3>

@@ -8,7 +8,9 @@
   },
   "scripts": {
     "start": "node backend/server.js",
-    "dev": "nodemon backend/server.js"
+    "dev": "nodemon backend/server.js",
+    "home:dev": "npm run dev --prefix home",
+    "home:build": "npm run build --prefix home"
   },
   "dependencies": {
     "express": "^4.18.2",

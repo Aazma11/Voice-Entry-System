@@ -3,44 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Saved Mark Sheets</title>
+    <title>Saved Mark Sheets — EduVoice</title>
+    <link rel="stylesheet" href="style.css">
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background: #f0f4f8;
-            min-height: 100vh;
-        }
-
-        /* ── Navbar ── */
-        .navbar {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
-            color: white;
-            padding: 0 20px;
-            height: 60px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .navbar h1 { font-size: 1.2rem; font-weight: 700; }
-        .navbar-right { display: flex; align-items: center; gap: 10px; }
-        .btn-back {
-            background: rgba(255,255,255,0.15);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-            padding: 7px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: background 0.2s;
-        }
-        .btn-back:hover { background: rgba(255,255,255,0.25); }
 
         .container {
             max-width: 1100px;
@@ -70,10 +35,10 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        .search-card input:focus { border-color: #2563eb; }
+        .search-card input:focus { border-color: var(--ink); }
         .btn-search {
             padding: 9px 20px;
-            background: #2563eb;
+            background: var(--ink);
             color: white;
             border: none;
             border-radius: 8px;
@@ -81,7 +46,7 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .btn-search:hover { background: #1d4ed8; }
+        .btn-search:hover { background: var(--teal); }
 
         /* ── Cards grid ── */
         .records-grid {
@@ -103,7 +68,7 @@
             box-shadow: 0 6px 20px rgba(0,0,0,0.12);
         }
         .card-top {
-            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            background: var(--ink);
             padding: 18px 20px;
             color: white;
         }
@@ -137,7 +102,7 @@
         .stat-box .val {
             font-size: 1.2rem;
             font-weight: 800;
-            color: #1e3a5f;
+            color: var(--ink);
         }
         .stat-box .lbl {
             font-size: 0.68rem;
@@ -153,7 +118,7 @@
         .btn-view {
             flex: 1;
             padding: 8px;
-            background: #2563eb;
+            background: var(--ink);
             color: white;
             border: none;
             border-radius: 7px;
@@ -162,10 +127,10 @@
             cursor: pointer;
             transition: background 0.2s;
         }
-        .btn-view:hover { background: #1d4ed8; }
+        .btn-view:hover { background: var(--teal); }
         .btn-export-card {
             padding: 8px 12px;
-            background: #16a34a;
+            background: var(--teal);
             color: white;
             border: none;
             border-radius: 7px;
@@ -203,7 +168,7 @@
             display: inline-block;
             margin-top: 14px;
             padding: 10px 20px;
-            background: #2563eb;
+            background: var(--ink);
             color: white;
             border-radius: 8px;
             text-decoration: none;
@@ -239,7 +204,7 @@
             to   { transform: scale(1);    opacity: 1; }
         }
         .modal-header {
-            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            background: var(--ink);
             color: white;
             padding: 20px 24px;
             border-radius: 16px 16px 0 0;
@@ -276,7 +241,7 @@
             background: #f8fafc;
             border-radius: 8px;
         }
-        .modal-stat .v { font-size: 1.4rem; font-weight: 800; color: #1e3a5f; }
+        .modal-stat .v { font-size: 1.4rem; font-weight: 800; color: var(--ink); }
         .modal-stat .l { font-size: 0.72rem; color: #64748b; font-weight: 600; text-transform: uppercase; }
         .modal-body {
             overflow-y: auto;
@@ -311,8 +276,8 @@
             font-size: 0.75rem;
             font-weight: 700;
         }
-        .grade-O  { background: #dcfce7; color: #16a34a; }
-        .grade-A  { background: #dbeafe; color: #1d4ed8; }
+        .grade-O  { background: #dcfce7; color: var(--teal); }
+        .grade-A  { background: #dbeafe; color: var(--teal); }
         .grade-B  { background: #fef3c7; color: #d97706; }
         .grade-C  { background: #fee2e2; color: #dc2626; }
         .modal-footer {
@@ -324,7 +289,7 @@
         }
         .btn-modal-export {
             padding: 9px 18px;
-            background: #16a34a;
+            background: var(--teal);
             color: white;
             border: none;
             border-radius: 8px;
@@ -360,7 +325,7 @@
             font-size: 0.85rem;
             font-weight: 600;
         }
-        .page-btn:hover:not(:disabled) { border-color: #2563eb; color: #2563eb; }
+        .page-btn:hover:not(:disabled) { border-color: var(--ink); color: var(--ink); }
         .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
         .page-info { font-size: 0.85rem; color: #64748b; padding: 7px 8px; }
 
@@ -373,11 +338,19 @@
 <body>
 
 <nav class="navbar">
-    <h1>📚 Saved Mark Sheets</h1>
-    <div class="navbar-right">
-        <span id="teacherName" style="font-size:0.85rem;opacity:0.85;"></span>
-        <button class="btn-back" onclick="window.location.href='markentry.html'">+ New Entry</button>
-        <button class="btn-back" onclick="window.location.href='dashboard.html'">← Dashboard</button>
+    <div class="nav-container">
+        <a class="brand" href="dashboard.html">
+            <span class="brand-mark">E</span>
+            <span class="brand-copy">
+                <strong>EduVoice</strong>
+                <span>Saved mark sheets</span>
+            </span>
+        </a>
+        <div class="navbar-right">
+            <span id="teacherName"></span>
+            <button class="btn-secondary" onclick="window.location.href='markentry.html'">New entry</button>
+            <button class="btn-secondary" onclick="window.location.href='dashboard.html'">Dashboard</button>
+        </div>
     </div>
 </nav>
 
@@ -414,7 +387,7 @@
         <div class="modal-stats">
             <div class="modal-stat"><div class="v" id="mTotal">—</div><div class="l">Students</div></div>
             <div class="modal-stat"><div class="v" id="mAvg">—</div><div class="l">Average</div></div>
-            <div class="modal-stat"><div class="v" id="mHigh" style="color:#16a34a;">—</div><div class="l">Highest</div></div>
+            <div class="modal-stat"><div class="v" id="mHigh" style="color:var(--teal);">—</div><div class="l">Highest</div></div>
             <div class="modal-stat"><div class="v" id="mLow" style="color:#dc2626;">—</div><div class="l">Lowest</div></div>
         </div>
         <div class="modal-body">
@@ -439,7 +412,7 @@
 
 <!-- SheetJS for Excel export -->
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
-<script src="../app.js"></script>
+<script src="app.js"></script>
 
 <script>
     const _port = window.location.port ? `:${window.location.port}` : '';
@@ -503,7 +476,7 @@
                         <div class="stats-row">
                             <div class="stat-box"><div class="val">${rec.totalStudents}</div><div class="lbl">Students</div></div>
                             <div class="stat-box"><div class="val">${rec.averageMark}</div><div class="lbl">Avg</div></div>
-                            <div class="stat-box"><div class="val" style="color:#16a34a">${rec.highestMark}</div><div class="lbl">High</div></div>
+                            <div class="stat-box"><div class="val" style="color:var(--teal)">${rec.highestMark}</div><div class="lbl">High</div></div>
                             <div class="stat-box"><div class="val" style="color:#dc2626">${rec.lowestMark}</div><div class="lbl">Low</div></div>
                         </div>
                         <div class="card-actions">

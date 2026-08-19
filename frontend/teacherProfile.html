@@ -17,14 +17,14 @@
 
         /* ── Header card ── */
         .profile-hero {
-            background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
+            background: var(--ink);
             border-radius: 16px;
             padding: 32px 28px;
             display: flex;
             align-items: center;
             gap: 20px;
             color: white;
-            box-shadow: 0 4px 20px rgba(37,99,235,0.3);
+            box-shadow: var(--shadow-md);
         }
         .avatar {
             width: 80px;
@@ -85,7 +85,7 @@
             width: 36px;
             height: 36px;
             border-radius: 8px;
-            background: #eff6ff;
+            background: var(--paper);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -122,7 +122,7 @@
         .stat-card .num {
             font-size: 1.8rem;
             font-weight: 800;
-            color: #1e3a5f;
+            color: var(--ink);
         }
         .stat-card .lbl {
             font-size: 0.75rem;
@@ -150,7 +150,7 @@
             outline: none;
             transition: border-color 0.2s;
         }
-        .pw-input-wrap input:focus { border-color: #2563eb; }
+        .pw-input-wrap input:focus { border-color: var(--teal); }
         .pw-toggle {
             position: absolute;
             right: 12px;
@@ -164,7 +164,7 @@
         }
         .btn-save-pw {
             padding: 10px 20px;
-            background: linear-gradient(135deg, #1e3a5f, #2563eb);
+            background: var(--ink);
             color: white;
             border: none;
             border-radius: 8px;
@@ -190,10 +190,16 @@
 
 <nav class="navbar">
     <div class="nav-container">
-        <h1>👤 My Profile</h1>
+        <a class="brand" href="dashboard.html">
+            <span class="brand-mark">E</span>
+            <span class="brand-copy">
+                <strong>EduVoice</strong>
+                <span>Teacher profile</span>
+            </span>
+        </a>
         <div class="nav-user">
-            <button onclick="window.location.href='dashboard.html'" class="btn-secondary">← Dashboard</button>
-            <button onclick="logout()" class="btn-secondary">Logout</button>
+            <button onclick="window.location.href='dashboard.html'" class="btn-secondary">Dashboard</button>
+            <button onclick="logout()" class="btn-secondary">Sign out</button>
         </div>
     </div>
 </nav>
